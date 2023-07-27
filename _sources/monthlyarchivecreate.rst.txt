@@ -1,0 +1,105 @@
+.. /copytemplate
+.. /moveo3notes
+MonthlyArchiveCreate.ps1
+========================
+
+The MonthlyArchiveCreate script is responsible for generating the monthly subfolders inside users' Archived folder.
+
+Input/ArchiveFolderIDs.csv
+--------------------------
+
+It takes the ArchiveFolderIDs.csv file created by UserProv.ps1 as input. This CSV file contains a "ParentID" column that contains the ID of each user's Archive folder and a "Name" column that's blank for every entry. 
+
+.. code-block:: 
+	:linenos:
+
+	"Name","ParentID"
+	"","218803635894"
+	"","218803485202"
+	"","218803499602"
+	"","218803693693"
+	"","218803501368"
+	"","218812969317"
+	"","218812722987"
+	"","218807898564"
+	"","218808772382"
+	"","218812995800"
+	"","218809367028"
+	"","218813358034"
+	"","218807276784"
+	"","218813193211"
+	"","218812864246"
+	"","218808774242"
+	"","218812840741"
+	"","218812948132"
+	"","218813070154"
+	"","218808222367"
+
+MonthlyArchiveCreate.ps1
+------------------------
+
+.. code-block:: Powershell
+	:linenos:
+
+	# This short script aims to create a folder in every Box user's "Archived" folder for the current month.
+	# This script should be scheduled to run on the first of every month with Task Scheduler
+
+
+	# Get the current data and format in 'yyyy-mm'
+	[string]$DATE = (Get-Date -Format "yyyy-MM")
+	# Set variable for pathname to input CSV
+	[string]$ArchivedFolderIDsInputPath = ".\Input\ArchiveFolderIDs.csv"
+	[string]$ArchivedFolderIDsOutputPath = ".\Output\" + $($DATE) + "ArchiveFolderIDs.csv"
+	[string]$ArchivedFolderCreateOutputPath = "..\MoveO3Notes\Input\" + $($DATE) + "ArchiveSubfolderIDs.csv"
+	# Set variable for result of Importing the CSV at above filepath
+	$ArchivedFolderIDs = Import-Csv $ArchivedFolderIDsInputPath
+
+	# Set every row in the "Name" column of the CSV file to the formatted date.
+	# Note: userprov.ps1 script should already have added the folder ID of each user's "Archived" folder into the CSV as the "ParentID", which is where this new folder should be added.
+	$ArchivedFolderIDs | ForEach-Object {
+	    $_.Name = $DATE
+	    return $_ 
+	}
+
+	# Save CSV file with changes
+	$ArchivedFolderIDs | Export-Csv $ArchivedFolderIDsOutputPath -NoTypeInformation
+	# Run Box CLI command for provisioning folders based on the CSV
+	$folderCreateResp = (box folders:create --bulk-file-path="$($ArchivedFolderIDsOutputPath)" --fields=parent,id,name --csv)
+	# Convert the API response to a PowerShell object
+	$folderCreateRespObject = ConvertFrom-Csv $folderCreateResp
+	# Export the API call returned PowerShell object to a CSV file
+	$folderCreateRespObject | Export-Csv $ArchivedFolderCreateOutputPath -NoTypeInformation
+
+
+The script iterates through the CSV file, setting the entry in the name column to the current date formatted as 'yyyy-mm'. It then exports the data to a new CSV in the /MonthlyArchiveCreate/Output/ folder called "[yyyy-mm]ArchiveFolderIDs.csv". This modified CSV now has both the name of the new folder to be created, and the ParentID, or folder in which to place this new folder. The API call to box is then made using this modified CSV in line 24. The response from Box.com after processing the CSV is then saved and exported into the MoveO3Notes/Input/ folder, as a file called "[yyyy-mm]ArchiveSubfolderIDs.csv".
+
+
+Output/ArchiveFolderIDs.csv
+---------------------------
+
+.. code-block:: 
+	:linenos:
+
+	"Name","ParentID"
+	"2023-07","218803635894"
+	"2023-07","218803485202"
+	"2023-07","218803499602"
+	"2023-07","218803693693"
+	"2023-07","218803501368"
+	"2023-07","218812969317"
+	"2023-07","218812722987"
+	"2023-07","218807898564"
+	"2023-07","218808772382"
+	"2023-07","218812995800"
+	"2023-07","218809367028"
+	"2023-07","218813358034"
+	"2023-07","218807276784"
+	"2023-07","218813193211"
+	"2023-07","218812864246"
+	"2023-07","218808774242"
+	"2023-07","218812840741"
+	"2023-07","218812948132"
+	"2023-07","218813070154"
+	"2023-07","218808222367"
+
+As you can see, the name column has been filled out so Box will know what name to make each of the created folders.

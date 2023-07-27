@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CopyTemplate.ps1 &mdash; O3 Notes Management with Box API  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="MoveO3Notes.ps1" href="moveo3notes.html" />
+    <link rel="prev" title="MonthlyArchiveCreate.ps1" href="monthlyarchivecreate.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            O3 Notes Management with Box API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filestructure.html">File Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scriptsoverview.html">Scripts Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Userprov.html">Userprov.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monthlyarchivecreate.html">MonthlyArchiveCreate.ps1</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CopyTemplate.ps1</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#input-activefolderids-csv">Input/ActiveFolderIDs.csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">CopyTemplate.ps1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output-activefolderids-csv">Output/ActiveFolderIDs.csv</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="moveo3notes.html">MoveO3Notes.ps1</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">O3 Notes Management with Box API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">CopyTemplate.ps1</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/copytemplate.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="copytemplate-ps1">
+<h1>CopyTemplate.ps1<a class="headerlink" href="#copytemplate-ps1" title="Permalink to this heading"></a></h1>
+<p>The CopyTemplate.ps1 script is used to generate a template O3 Note file in each user’s “Active” folder, at the start of each week. It takes “Input/ActiveFolderIDs.csv” as input and produces a modified version at “Output/ActiveFolderIDs.csv” as output to be used for the Box API call.</p>
+<section id="input-activefolderids-csv">
+<h2>Input/ActiveFolderIDs.csv<a class="headerlink" href="#input-activefolderids-csv" title="Permalink to this heading"></a></h2>
+<p>This file was generated by the Userprov.ps1 script. As an input, it contains the columns “ParentID”, “ID”, and “Name”. The ParentID is the ID of each “User’s O3 Notes” folder and the “ID” is the ID of the Active subfolder within it. The name column is blank.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="s2">&quot;ParentID&quot;</span><span class="p">,</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span><span class="s2">&quot;Name&quot;</span>
+<span class="linenos"> 2</span><span class="s2">&quot;218803374534&quot;</span><span class="p">,</span><span class="s2">&quot;218803091859&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos"> 3</span><span class="s2">&quot;218802981391&quot;</span><span class="p">,</span><span class="s2">&quot;218803453792&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos"> 4</span><span class="s2">&quot;218801920118&quot;</span><span class="p">,</span><span class="s2">&quot;218799584712&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos"> 5</span><span class="s2">&quot;218803810933&quot;</span><span class="p">,</span><span class="s2">&quot;218803407705&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos"> 6</span><span class="s2">&quot;218803307746&quot;</span><span class="p">,</span><span class="s2">&quot;218801123067&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos"> 7</span><span class="s2">&quot;218807048762&quot;</span><span class="p">,</span><span class="s2">&quot;218806406017&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos"> 8</span><span class="s2">&quot;218807738174&quot;</span><span class="p">,</span><span class="s2">&quot;218808282886&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos"> 9</span><span class="s2">&quot;218807997341&quot;</span><span class="p">,</span><span class="s2">&quot;218807770866&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos">10</span><span class="s2">&quot;218812796703&quot;</span><span class="p">,</span><span class="s2">&quot;218812811514&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos">11</span><span class="s2">&quot;218811057055&quot;</span><span class="p">,</span><span class="s2">&quot;218807793088&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos">12</span><span class="s2">&quot;218813178003&quot;</span><span class="p">,</span><span class="s2">&quot;218813054146&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos">13</span><span class="s2">&quot;218812947979&quot;</span><span class="p">,</span><span class="s2">&quot;218812678889&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos">14</span><span class="s2">&quot;218808824673&quot;</span><span class="p">,</span><span class="s2">&quot;218813116032&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos">15</span><span class="s2">&quot;218812974802&quot;</span><span class="p">,</span><span class="s2">&quot;218812881434&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos">16</span><span class="s2">&quot;218807738333&quot;</span><span class="p">,</span><span class="s2">&quot;218810024820&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos">17</span><span class="s2">&quot;218807836054&quot;</span><span class="p">,</span><span class="s2">&quot;218811606956&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos">18</span><span class="s2">&quot;218810800580&quot;</span><span class="p">,</span><span class="s2">&quot;218811807610&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos">19</span><span class="s2">&quot;218813259794&quot;</span><span class="p">,</span><span class="s2">&quot;218808273465&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos">20</span><span class="s2">&quot;218810423536&quot;</span><span class="p">,</span><span class="s2">&quot;218813037202&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+<span class="linenos">21</span><span class="s2">&quot;218813516797&quot;</span><span class="p">,</span><span class="s2">&quot;218810219723&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h2>CopyTemplate.ps1<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<p>The script works by iterating through the input CSV, setting the ParentID values to what in the ID column, setting the values in the ID column to the ID of the O3 Notes Template file, and setting the name for each to the current date in “yyyy-mm-dd” format. It then makes the API call to Box, telling it which folder to place the file in (ParentID), which file is being copied from (the template), and what the name of this file should be (Name). The response from the API call is then saved in ../MoveO3Notes/Input/ as [yyyy-mm-dd]ActiveFileIDs.csv.</p>
+<div class="highlight-Powershell notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c"># This short script is responsible for copying the O3 Notes Template file into each user&#39;s &quot;Active folder&quot;.</span>
+<span class="linenos"> 2</span><span class="c"># This script should be scheduled to run weekly with Task Scheduler.</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c"># Get the current data and format in &#39;yyyy-mm-dd&#39;</span>
+<span class="linenos"> 5</span><span class="nv">$DATE</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Date</span> <span class="n">-Format</span> <span class="s2">&quot;yyyy-MM-dd&quot;</span><span class="p">)</span>
+<span class="linenos"> 6</span><span class="c"># Set variable for pathname to input CSV</span>
+<span class="linenos"> 7</span><span class="c"># Input CSV is ActiveFolderIDs.csv</span>
+<span class="linenos"> 8</span>    <span class="c"># This was generated as a result of the UserProv.ps1 script</span>
+<span class="linenos"> 9</span><span class="c"># Output files are ActiveFolderIDs.csv and ActiveFileIDs.csv</span>
+<span class="linenos">10</span>    <span class="c"># Outputted ActiveFolderIDs.csv is the modified input file, formatted for making the API call to box</span>
+<span class="linenos">11</span>    <span class="c"># ActiveFileIDs.csv is whats returned from box after making the API call, containing information about the files that created to populate users&#39; Active folder.</span>
+<span class="linenos">12</span><span class="no">[string]</span><span class="nv">$ActiveFolderIDsInputPath</span> <span class="p">=</span> <span class="s2">&quot;.\Input\ActiveFolderIDs.csv&quot;</span>
+<span class="linenos">13</span><span class="no">[string]</span><span class="nv">$ActiveFolderIDsOutputPath</span> <span class="p">=</span> <span class="s2">&quot;.\Output\ActiveFolderIDs.csv&quot;</span>
+<span class="linenos">14</span><span class="no">[string]</span><span class="nv">$ActiveFileIDsOutputPath</span> <span class="p">=</span> <span class="s2">&quot;..\MoveO3Notes\Input\&quot;</span><span class="p">+$(</span><span class="nv">$DATE</span><span class="p">)+</span><span class="s2">&quot;ActiveFileIDs.csv&quot;</span>
+<span class="linenos">15</span><span class="c"># Set variable for result of Importing the CSV at above filepath</span>
+<span class="linenos">16</span><span class="nv">$ActiveFolderIDs</span> <span class="p">=</span> <span class="nb">Import-Csv</span> <span class="nv">$ActiveFolderIDsInputPath</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="c"># Iterate through input CSV and set ID of file to be copied to the file ID of the template</span>
+<span class="linenos">19</span><span class="c"># Then set the name of the newly copied file to the current date</span>
+<span class="linenos">20</span><span class="nv">$ActiveFolderIDs</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
+<span class="linenos">21</span>    <span class="nv">$_</span><span class="p">.</span><span class="n">ParentID</span> <span class="p">=</span> <span class="nv">$_</span><span class="p">.</span><span class="n">ID</span>
+<span class="linenos">22</span>    <span class="nv">$_</span><span class="p">.</span><span class="n">ID</span> <span class="p">=</span> <span class="n">1266570275665</span>
+<span class="linenos">23</span>    <span class="nv">$_</span><span class="p">.</span><span class="n">Name</span> <span class="p">=</span> <span class="p">$(</span><span class="nv">$DATE</span><span class="p">)</span> <span class="p">+</span> <span class="s2">&quot;.boxnote&quot;</span>
+<span class="linenos">24</span>    <span class="k">return</span> <span class="nv">$_</span>
+<span class="linenos">25</span><span class="p">}</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="nv">$ActiveFolderIDsOutputPath</span> <span class="n">-NoTypeInformation</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span><span class="c"># Make Box API call with input CSV and return only the ID of the new files in CSV format</span>
+<span class="linenos">28</span><span class="nv">$templateMoveResp</span> <span class="p">=</span> <span class="p">(</span><span class="n">box</span> <span class="n">files</span><span class="p">:</span><span class="nb">copy </span><span class="p">-</span><span class="n">-bulk</span><span class="o">-file</span><span class="n">-path</span><span class="p">=</span><span class="nv">$ActiveFolderIDsOutputPath</span> <span class="p">-</span><span class="n">-fields</span><span class="p">=</span><span class="n">parent</span><span class="p">,</span><span class="n">id</span><span class="p">,</span><span class="n">name</span> <span class="p">-</span><span class="n">-csv</span><span class="p">)</span>
+<span class="linenos">29</span><span class="c"># Convert the API response to a PowerShell object</span>
+<span class="linenos">30</span><span class="nv">$templateMoveRespObject</span> <span class="p">=</span> <span class="nb">ConvertFrom-Csv</span> <span class="nv">$templateMoveResp</span>
+<span class="linenos">31</span><span class="c"># Export the PowerShell object to a CSV file</span>
+<span class="linenos">32</span><span class="nv">$templateMoveRespObject</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="nv">$ActiveFileIDsOutputPath</span> <span class="n">-NoTypeInformation</span>
+</pre></div>
+</div>
+</section>
+<section id="output-activefolderids-csv">
+<h2>Output/ActiveFolderIDs.csv<a class="headerlink" href="#output-activefolderids-csv" title="Permalink to this heading"></a></h2>
+<p>Below is an example of how the Output/ActiveFolderIDs.csv file should look.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="s2">&quot;ParentID&quot;</span><span class="p">,</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span><span class="s2">&quot;Name&quot;</span>
+<span class="linenos"> 2</span><span class="s2">&quot;218803091859&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos"> 3</span><span class="s2">&quot;218803453792&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos"> 4</span><span class="s2">&quot;218799584712&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos"> 5</span><span class="s2">&quot;218803407705&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos"> 6</span><span class="s2">&quot;218801123067&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos"> 7</span><span class="s2">&quot;218806406017&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos"> 8</span><span class="s2">&quot;218808282886&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos"> 9</span><span class="s2">&quot;218807770866&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos">10</span><span class="s2">&quot;218812811514&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos">11</span><span class="s2">&quot;218807793088&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos">12</span><span class="s2">&quot;218813054146&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos">13</span><span class="s2">&quot;218812678889&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos">14</span><span class="s2">&quot;218813116032&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos">15</span><span class="s2">&quot;218812881434&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos">16</span><span class="s2">&quot;218810024820&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos">17</span><span class="s2">&quot;218811606956&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos">18</span><span class="s2">&quot;218811807610&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos">19</span><span class="s2">&quot;218808273465&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos">20</span><span class="s2">&quot;218813037202&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+<span class="linenos">21</span><span class="s2">&quot;218810219723&quot;</span><span class="p">,</span><span class="s2">&quot;1266570275665&quot;</span><span class="p">,</span><span class="s2">&quot;2023-07-26.boxnote&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="monthlyarchivecreate.html" class="btn btn-neutral float-left" title="MonthlyArchiveCreate.ps1" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="moveo3notes.html" class="btn btn-neutral float-right" title="MoveO3Notes.ps1" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jeffrey Samuels, Hannah Brown.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

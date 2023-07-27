@@ -1,0 +1,225 @@
+MoveO3Notes.ps1
+===============
+
+The MoveO3Notes.ps1 script is responsible for placing the files in each user's Active folder into the appropriate Archived/[yyyy-mm] subfolder.
+
+In order to map where each file needs to go, three inputs CSVs are used; ArchiveSubfolderIDs.csv, ActiveFileIDs.csv, and MasterMap.csv. Two output CSVs are generated, ToMove.csv which is the product of mapping files to the right folder and is used for making the API Call. [yyyy-mm-dd]-NotesMoved.csv is also created from Box's response to the API Call. The graphic below demonstrates how this process works.
+
+.. image:: /moveo3notesexplained.png
+
+Please note that ArchiveFolders.csv as shown in the image will actually be called ArchiveSubfolderIDs.csv
+
+ActiveFileIDs.csv
+-----------------
+
+.. code-block:: 
+	:linenos:
+
+	"type","id","parent.type","parent.id","parent.sequence_id","parent.etag","parent.name","name"
+	"file","1267167434323","folder","218803091859","0","0","Active","2023-07-26.boxnote"
+	"file","1267176409533","folder","218803453792","0","0","Active","2023-07-26.boxnote"
+	"file","1267167032866","folder","218799584712","0","0","Active","2023-07-26.boxnote"
+	"file","1267176028384","folder","218803407705","0","0","Active","2023-07-26.boxnote"
+	"file","1267175329725","folder","218801123067","0","0","Active","2023-07-26.boxnote"
+	"file","1267175269565","folder","218806406017","0","0","Active","2023-07-26.boxnote"
+	"file","1267175629939","folder","218808282886","0","0","Active","2023-07-26.boxnote"
+	"file","1267156492214","folder","218807770866","0","0","Active","2023-07-26.boxnote"
+	"file","1267175550960","folder","218812811514","0","0","Active","2023-07-26.boxnote"
+	"file","1267171587751","folder","218807793088","0","0","Active","2023-07-26.boxnote"
+	"file","1267175878968","folder","218813054146","0","0","Active","2023-07-26.boxnote"
+	"file","1267167736227","folder","218812678889","0","0","Active","2023-07-26.boxnote"
+	"file","1267166907877","folder","218813116032","0","0","Active","2023-07-26.boxnote"
+	"file","1267176318545","folder","218812881434","0","0","Active","2023-07-26.boxnote"
+	"file","1267175562598","folder","218810024820","0","0","Active","2023-07-26.boxnote"
+	"file","1267156533014","folder","218811606956","0","0","Active","2023-07-26.boxnote"
+	"file","1267175881632","folder","218811807610","0","0","Active","2023-07-26.boxnote"
+	"file","1267175965261","folder","218808273465","0","0","Active","2023-07-26.boxnote"
+	"file","1267171424530","folder","218813037202","0","0","Active","2023-07-26.boxnote"
+	"file","1267175312443","folder","218810219723","0","0","Active","2023-07-26.boxnote"
+
+
+ArchiveSubfolderIDs.csv
+-----------------------
+
+.. code-block:: 
+	:linenos:
+
+	"type","id","parent.type","parent.id","parent.sequence_id","parent.etag","parent.name","name"
+	"folder","218813502034","folder","218812969317","0","0","Archived","2023-07"
+	"folder","218813283663","folder","218812722987","0","0","Archived","2023-07"
+	"folder","218807721584","folder","218807898564","0","0","Archived","2023-07"
+	"folder","218810770899","folder","218808772382","0","0","Archived","2023-07"
+	"folder","218810253586","folder","218812995800","0","0","Archived","2023-07"
+	"folder","218813344211","folder","218809367028","0","0","Archived","2023-07"
+	"folder","218813022105","folder","218813358034","0","0","Archived","2023-07"
+	"folder","218812962752","folder","218807276784","0","0","Archived","2023-07"
+	"folder","218813553159","folder","218813193211","0","0","Archived","2023-07"
+	"folder","218810860498","folder","218812864246","0","0","Archived","2023-07"
+	"folder","218813044314","folder","218808774242","0","0","Archived","2023-07"
+	"folder","218810843191","folder","218812840741","0","0","Archived","2023-07"
+	"folder","218808102755","folder","218812948132","0","0","Archived","2023-07"
+	"folder","218808169554","folder","218813070154","0","0","Archived","2023-07"
+	"folder","218813058168","folder","218808222367","0","0","Archived","2023-07"
+
+MasterMap.csv
+-------------
+
+.. code-block:: 
+	:linenos:
+
+	"User","ArchiveFolderID","ActiveFolderID"
+	"PEIBrandon's O3 Notes","218803635894","218803091859"
+	"PEIKevin's O3 Notes","218803485202","218803453792"
+	"EricSchroeder's O3 Notes","218803499602","218799584712"
+	"AzureTest's O3 Notes","218803693693","218803407705"
+	"ErinTest's O3 Notes","218803501368","218801123067"
+	"PEIBrandon's O3 Notes",,
+	"PEIKevin's O3 Notes",,
+	"EricSchroeder's O3 Notes",,
+	"AzureTest's O3 Notes",,
+	"ErinTest's O3 Notes",,
+	"Marcustest's O3 Notes",,
+	"DeployAdmin's O3 Notes","218812969317","218806406017"
+	"MaintenanceAdmin's O3 Notes","218812722987","218808282886"
+	"GarethOxendine's O3 Notes","218807898564","218807770866"
+	"MigrationTool's O3 Notes","218808772382","218812811514"
+	"MikeElmore's O3 Notes","218812995800","218807793088"
+	"JaredPutnam's O3 Notes","218809367028","218813054146"
+	"AlGomez's O3 Notes","218813358034","218812678889"
+	"CrissiLanier's O3 Notes","218807276784","218813116032"
+	"ZsofiaGutvill's O3 Notes","218813193211","218812881434"
+	"DennisRichardson's O3 Notes","218812864246","218810024820"
+	"JackieJensen's O3 Notes","218808774242","218811606956"
+	"ShelleySchmaltz's O3 Notes","218812840741","218811807610"
+	"AmandaCarson's O3 Notes","218812948132","218808273465"
+	"NicoleCannon's O3 Notes","218813070154","218813037202"
+	"RosanneSmithKaya's O3 Notes","218808222367","218810219723"
+	"PEIBrandon's O3 Notes",,
+	"PEIKevin's O3 Notes",,
+	"PEIBrandon's O3 Notes",,
+	"PEIKevin's O3 Notes",,
+	"EricSchroeder's O3 Notes",,
+	"AzureTest's O3 Notes",,
+	"ErinTest's O3 Notes",,
+	"Marcustest's O3 Notes",,
+	"PEIBrandon's O3 Notes",,
+	"PEIKevin's O3 Notes",,
+	"EricSchroeder's O3 Notes",,
+	"PEIBrandon's O3 Notes",,
+	"PEIKevin's O3 Notes",,
+	"EricSchroeder's O3 Notes",,
+	"AzureTest's O3 Notes",,
+	"ErinTest's O3 Notes",,
+	"Marcustest's O3 Notes",,
+
+MoveO3Notes.ps1
+---------------
+
+.. code-block:: Powershell
+	:linenos:
+
+	# Script for moving O3 Notes from Active to Archived subfolder
+
+	# Steps needed to complete task:
+	# Pull input files from O3 Note creation (ID, ParentID), Archived Subfolder creation (ID, ParentID), MasterMapping (Username, ArchiveID, ActiveID), Box report (O3 Note ID, Modified-date)
+	# Compare O3 Note ParentID (ActiveID) to MasterMapping to find User's ArchiveID
+	# Compare recent Archive Subfolder ParentID (ArchiveID) to MasterMapping
+	# Append O3 Note ID and Archive Subfolder ID to a new CSV
+	# Append last modified date to above CSV and change columnname to 'Name'
+	# Rename O3 Note file to last modified date
+	# Run box:files move bulk command using new CSV to put O3 Notes into appropriate Archived subfolder
+
+	$DATE = (Get-Date -Format "yyyy-MM-dd")
+	$DATE2 = (Get-Date -Format "yyyy-MM")
+	$ExportPath = ".\Output\" + $($DATE) + "-NotesMoved.csv"
+
+	Function moveMapping {
+	    # Set the paths to the input CSV files
+	    $archiveSubfoldersFile = ".\Input\" + $($DATE2) + "ArchiveSubfolderIDs.csv"
+	    $activeFileIDsFile = ".\Input\" + $($DATE) + "ActiveFileIDs.csv"
+	    $masterMapFile = ".\Input\MasterMap.csv"
+
+	    # Set the path to the output CSV file
+	    $toMoveFile = ".\Output\ToMove.csv"
+
+	    # Read the CSV files
+	    $archiveSubfolders = Import-Csv $archiveSubfoldersFile
+	    $activeFileIDs = Import-Csv $activeFileIDsFile
+	    $masterMap = Import-Csv $masterMapFile
+
+	    # Create a new array to store the results
+	    $results = @()
+
+	    # Add this line to check if the ActiveFileIDs.csv has been loaded correctly
+	    Write-Host "Number of ActiveFileIDs: $($activeFileIDs.Count)"
+
+	    # Iterate through the ActiveFileIDs.csv
+	    foreach ($activeFileID in $activeFileIDs) {
+	        # Get the ActiveFileID
+	        $activeID = $activeFileID.id
+
+	        # Find the matching row in the MasterMap.csv
+	        $matchingRow = $masterMap | Where-Object { $_.ActiveFolderID -eq $activeFileID.'parent.id' }
+
+	        Write-Host "Matching row in MasterMap: $($matchingRow -ne $null)"
+
+	        if ($matchingRow) {
+	            # Get the ArchiveFolderID from the matching row
+	            $archiveFolderID = $matchingRow.ArchiveFolderID
+
+	            # Find the matching row in the ArchiveSubfolders.csv
+	            $matchingRow = $archiveSubfolders | Where-Object { $_.'parent.id' -eq $archiveFolderID }
+
+	            Write-Host "Matching row in ArchiveSubfolders: $($matchingRow -ne $null)"
+
+	            if ($matchingRow) {
+	                # Get the ArchiveSubFolderID from the matching row
+	                $archiveSubFolderID = $matchingRow.id
+
+	                # Create a new object with the ActiveFileID and ArchiveSubFolderID
+	                $result = [PSCustomObject] @{
+	                    ID = $activeID
+	                    ParentID = $archiveSubFolderID
+	                }
+
+	                # Add the result to the results array
+	                $results += $result
+	            }
+	        }
+	    }
+
+	    # Add this line to check the number of results
+	    Write-Host "Number of results: $($results.Count)"
+	    # Export the results to the ToMove.csv file
+	    $results | Export-Csv $toMoveFile -NoTypeInformation
+	    $moveResp = box files:move --bulk-file-path=$toMoveFile --csv
+	    $moveResp | Export-Csv $ExportPath -NoTypeInformation
+	}
+
+	moveMapping
+
+
+Output/ToMove.csv
+-----------------
+
+.. code-block:: 
+	:linenos:
+	
+	"ID","ParentID"
+	"1267175269565","218813502034"
+	"1267175629939","218813283663"
+	"1267156492214","218807721584"
+	"1267175550960","218810770899"
+	"1267171587751","218810253586"
+	"1267175878968","218813344211"
+	"1267167736227","218813022105"
+	"1267166907877","218812962752"
+	"1267176318545","218813553159"
+	"1267175562598","218810860498"
+	"1267156533014","218813044314"
+	"1267175881632","218810843191"
+	"1267175965261","218808102755"
+	"1267171424530","218808169554"
+	"1267175312443","218813058168"
+
+The files to be moved (ID) have been mapped to the folders they should be moved to (ParentID).

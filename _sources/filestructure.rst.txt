@@ -1,0 +1,86 @@
+.. /Userprov
+.. /scriptsoverview
+.. /monthlyarchivecreate
+.. /copytemplate
+.. /moveo3notes
+File Structure
+==============
+
+The folder structure of this repository is situated inside a shared folder called "O3 Notes", which is located inside the root directory.
+Inside the "O3 Notes" folder is where every employee's personal O3 Notes folder is located. These folders are shared only with
+the employee and their supervisor. In this example, Jeffrey cannot view Hannah's folder or any of its contents and vice versa.
+Richard Sealund on the other hand, who is both Hannah and Jeffrey's supervisor, is able to view his own O3 notes folder, as
+well as both of theirs.
+
+Below is an example of the file structure used for this repository.
+
+.. code-block::
+
+	.
+	└── O3 Notes/
+	    ├── JeffreySamuels's O3 Notes/
+	    │   ├── Active/
+	    │   │   ├── 2023-7-23.boxnote
+	    │   │   ├── 2023-7-16.boxnote
+	    │   │   ├── 2023-7-9.boxnote
+	    │   │   └── 2023-7-2.boxnote
+	    │   └── Archived/
+	    │       ├── 2023-7/
+	    │       ├── 2023-6/
+	    │       │   ├── 2023-6-25.boxnote
+	    │       │   ├── 2023-6-18.boxnote
+	    │       │   ├── 2023-6-11.boxnote
+	    │       │   └── 2023-6-4.boxnote
+	    │       └── 2023-5/
+	    │           ├── 2023-5-28.boxnote
+	    │           ├── 2023-5-21.boxnote
+	    │           ├── 2023-5-14.boxnote
+	    │           └── 2023-5-7.boxnote
+	    ├── HannahBrown's O3 Notes/
+	    │   ├── Active/
+	    │   │   ├── 2023-7-24.boxnote
+	    │   │   ├── 2023-7-17.boxnote
+	    │   │   ├── 2023-7-10.boxnote
+	    │   │   └── 2023-7-3.boxnote
+	    │   └── Archived/
+	    │       ├── 2023-7/
+	    │       ├── 2023-6/
+	    │       │   ├── 2023-6-25.boxnote
+	    │       │   ├── 2023-6-18.boxnote
+	    │       │   ├── 2023-6-11.boxnote
+	    │       │   └── 2023-6-4.boxnote
+	    │       └── 2023-5/
+	    │           ├── 2023-5-28.boxnote
+	    │           ├── 2023-5-21.boxnote
+	    │           ├── 2023-5-14.boxnote
+	    │           └── 2023-5-7.boxnote
+	    └── RichardSealund's O3 Notes/
+	        ├── Active/
+	        │   ├── 2023-7-24.boxnote
+	        │   ├── 2023-7-17.boxnote
+	        │   ├── 2023-7-10.boxnote
+	        │   └── 2023-7-3.boxnote
+	        └── Archived/
+	            ├── 2023-7/
+	            ├── 2023-6/
+	            │   ├── 2023-6-25.boxnote
+	            │   ├── 2023-6-18.boxnote
+	            │   ├── 2023-6-11.boxnote
+	            │   └── 2023-6-4.boxnote
+	            └── 2023-5/
+	                ├── 2023-5-28.boxnote
+	                ├── 2023-5-21.boxnote
+	                ├── 2023-5-14.boxnote
+	                └── 2023-5-7.boxnote
+
+In this example, Richard Sealund is the supervisor of Jeffrey Samuels and Hannah Brown.
+	* Jeffrey can view inside his personal O3 notes folder
+	* Jeffrey cannot see "HannahBrown's O3 Notes/" or "RichardSealund's O3 Notes/"
+	* Hannah also can only view her own folder.
+	* Richard has editor permissions to Jeffrey and Hannah's Active folders, and viewer permissions to see their Archived folders because he is their supervisor.
+	* Richard has view-only permissions to his own folders.
+
+Scheduling
+	* On the first of the month, the current month's Archived subfolder is created.
+	* Every Sunday, a new file is added to each user's Active folder.
+	* At the end of the month, all the files in each user's Active folder are moved to the appropriate Archived subfolder.

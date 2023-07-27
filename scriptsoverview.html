@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scripts Overview &mdash; O3 Notes Management with Box API  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Userprov.ps1" href="Userprov.html" />
+    <link rel="prev" title="File Structure" href="filestructure.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            O3 Notes Management with Box API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filestructure.html">File Structure</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Scripts Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scheduling">Scheduling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#inputs-and-outputs">Inputs and Outputs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Userprov.html">Userprov.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monthlyarchivecreate.html">MonthlyArchiveCreate.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copytemplate.html">CopyTemplate.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="moveo3notes.html">MoveO3Notes.ps1</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">O3 Notes Management with Box API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Scripts Overview</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/scriptsoverview.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="scripts-overview">
+<h1>Scripts Overview<a class="headerlink" href="#scripts-overview" title="Permalink to this heading"></a></h1>
+<dl class="simple">
+<dt>There are 5 scripts that are responsible for maintaining this system.</dt><dd><ol class="arabic simple">
+<li><p>Get-AD-Users.ps1</p></li>
+<li><p><a class="reference external" href="Userprov.html">UserProv.ps1</a></p></li>
+<li><p><a class="reference external" href="monthlyarchivecreate.html">MonthlyArchiveCreate.ps1</a></p></li>
+<li><p><a class="reference external" href="copytemplate.html">CopyTemplate.ps1</a></p></li>
+<li><p><a class="reference external" href="moveo3notes.html">MoveO3Notes.ps1</a></p></li>
+</ol>
+</dd>
+</dl>
+<section id="scheduling">
+<h2>Scheduling<a class="headerlink" href="#scheduling" title="Permalink to this heading"></a></h2>
+<p>There is a specific order these scripts should be run. This can be set with Windows Task Scheduler.</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>Get-AD-Users.ps1</dt><dd><ul>
+<li><p>Whenever new people are added to the organization, run this script before running Userprov.ps1</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Userprov.ps1</dt><dd><ul>
+<li><p>Whenever new people are added to the organization.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>MonthlyArchiveCreate.ps1</dt><dd><ul>
+<li><p>On the first of each month.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>CopyTemplate.ps1</dt><dd><ul>
+<li><p>Every Sunday</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>MoveO3Notes.ps1</dt><dd><ul>
+<li><p>On the last day of each month.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="inputs-and-outputs">
+<h2>Inputs and Outputs<a class="headerlink" href="#inputs-and-outputs" title="Permalink to this heading"></a></h2>
+<p>The Powershell scripts that power this system do so by taking and modifying CSV files, then making API calls to Box. Each script takes in at least one input file and outputs another. Some times this means modifying an existing file, such as filling out a column with a value, or switching column names. This is done so the <code class="docutils literal notranslate"><span class="pre">--bulk-file-path=</span></code> flag is capable of taking the CSV files as input to perform all the desired actions on Box’s backend.</p>
+<p>Below is an image showing the inputs and outputs for the scripts.</p>
+<img alt="_images/ScriptDependencyDiagram.png" src="_images/ScriptDependencyDiagram.png" />
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="filestructure.html" class="btn btn-neutral float-left" title="File Structure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Userprov.html" class="btn btn-neutral float-right" title="Userprov.ps1" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jeffrey Samuels, Hannah Brown.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

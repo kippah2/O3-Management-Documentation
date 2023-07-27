@@ -1,0 +1,47 @@
+.. /Userprov
+.. /scriptsoverview
+.. /monthlyarchivecreate
+.. /copytemplate
+.. /moveo3notes
+Introduction
+===============
+
+Welcome to the O3 Notes Repo documentation!
+
+This system was designed with extensibility and servicability in mind. This documentation
+aims to assist administrators in understanding the underlying technology and logic of this
+system so that they may use, repair, add-onto, or change how O3 notes are stored and 
+maintained using Box.
+
+**Objective**
+-------------
+
+The goal of this project was to create a repository for storing and managing O3 notes.
+	* Employees should not be able to go back and modify their previous meeting notes.
+	* Ensure Confidentiality, Integrity, and Accessibility of data.
+	* Provide an intuitive end-user experience.
+	* Generate dashboards so HR can track that O3s are being done.
+
+
+**Why Box?**
+------------
+
+Box was chosen as the platform for this project for the following reasons:
+	* Cost savings
+		* Majority of Truebeck personnel already have Box licenses.
+	* Unlimited Storage
+		* Box offers unlimited storage for Business Plus plan subscribers.
+		* Considering the volume of O3 notes generated and stored, 
+		  this scalability is critical.
+	* Box-CLI
+		* Being able to perform Box actions from a command line opens the 
+		  door to automating repetitive tasks and complete extensibility.
+	* User Friendly
+		* Most employees are already using Box and know how to navigate its 
+		  interface.
+	* Access Controls
+		* Designed to support multiple users with varying levels of access on 
+		  a per-file and per-folder basis.
+	* Reporting
+		* Box can generate detailed reports on various functions. HR can view 
+		  helpful graphics for O3 compliance monitoring.

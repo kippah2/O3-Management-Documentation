@@ -1,0 +1,40 @@
+.. /Userprov
+.. /scriptsoverview
+.. /monthlyarchivecreate
+.. /copytemplate
+.. /moveo3notes
+Getting Started
+===============
+
+The majority of operations involved in making this system work utilize 
+Powershell scripts and the Box-CLI. 
+
+Box-CLI
+--------
+Box offers a command line interface which, by making API calls, is capable of performing most user actions that can be performed on Box.com. It is highly recommended that users familiarize themselves with the Box-CLI.
+
+*In order to install and use the Box-CLI, you will have to follow the Box-CLI documentation to retrieve your session credentials (ClientID and Client Secret).*
+
+`Box CLI documentation <https://developer.box.com/guides/cli/quick-start/>`_.
+
+There is also a Github page for the Box-CLI. This offers further documentation and even provides a few sample Powershell scripts.
+
+`Box CLI Github <https://github.com/box/boxcli>`_.
+
+Powershell
+----------
+Powershell was chosen as the scripting engine as its native to Windows machines and well documented.
+
+These scripts effectively manage the repository by creating and modifying CSV files with file structure information and making API calls to Box via the CLI.
+
+`Powershell documentation <https://learn.microsoft.com/en-us/powershell/>`_.
+
+
+
+Key Concepts
+------------
+The most important concepts to understand are the Powershell CSV cmdlets and the Box CLI's ``--bulk-file-path`` flag.
+
+The CSV cmdlets are used for imoprting CSVs and exporting CSVs. When a CSV has been imported, Powershell will read the data as objects. Each row is an object, and each column is an attribute. This will be covered in more depth later in the documentation. The key cmdlets to learn are ``Import-Csv`` (`here <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/import-csv?view=powershell-7.3>`_) and ``Export-Csv`` (`here <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/export-csv?view=powershell-7.3>`_).
+
+Box-CLI is capable of using the ``--bulk-file-path=`` flag to take in a CSV filepath as an argument. Box will then perform the desired action, iterating through each row of the CSV. There are various examples of how to format these CSVs on the `Github page <https://github.com/box/boxcli/tree/main/docs/Bulk%20actions>`_.

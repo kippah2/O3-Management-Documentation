@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MonthlyArchiveCreate.ps1 &mdash; O3 Notes Management with Box API  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="CopyTemplate.ps1" href="copytemplate.html" />
+    <link rel="prev" title="Userprov.ps1" href="Userprov.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            O3 Notes Management with Box API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filestructure.html">File Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scriptsoverview.html">Scripts Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Userprov.html">Userprov.ps1</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">MonthlyArchiveCreate.ps1</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#input-archivefolderids-csv">Input/ArchiveFolderIDs.csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">MonthlyArchiveCreate.ps1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output-archivefolderids-csv">Output/ArchiveFolderIDs.csv</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="copytemplate.html">CopyTemplate.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="moveo3notes.html">MoveO3Notes.ps1</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">O3 Notes Management with Box API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">MonthlyArchiveCreate.ps1</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/monthlyarchivecreate.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="monthlyarchivecreate-ps1">
+<h1>MonthlyArchiveCreate.ps1<a class="headerlink" href="#monthlyarchivecreate-ps1" title="Permalink to this heading"></a></h1>
+<p>The MonthlyArchiveCreate script is responsible for generating the monthly subfolders inside users’ Archived folder.</p>
+<section id="input-archivefolderids-csv">
+<h2>Input/ArchiveFolderIDs.csv<a class="headerlink" href="#input-archivefolderids-csv" title="Permalink to this heading"></a></h2>
+<p>It takes the ArchiveFolderIDs.csv file created by UserProv.ps1 as input. This CSV file contains a “ParentID” column that contains the ID of each user’s Archive folder and a “Name” column that’s blank for every entry.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="s2">&quot;Name&quot;</span><span class="p">,</span><span class="s2">&quot;ParentID&quot;</span>
+<span class="linenos"> 2</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218803635894&quot;</span>
+<span class="linenos"> 3</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218803485202&quot;</span>
+<span class="linenos"> 4</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218803499602&quot;</span>
+<span class="linenos"> 5</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218803693693&quot;</span>
+<span class="linenos"> 6</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218803501368&quot;</span>
+<span class="linenos"> 7</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218812969317&quot;</span>
+<span class="linenos"> 8</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218812722987&quot;</span>
+<span class="linenos"> 9</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218807898564&quot;</span>
+<span class="linenos">10</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218808772382&quot;</span>
+<span class="linenos">11</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218812995800&quot;</span>
+<span class="linenos">12</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218809367028&quot;</span>
+<span class="linenos">13</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218813358034&quot;</span>
+<span class="linenos">14</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218807276784&quot;</span>
+<span class="linenos">15</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218813193211&quot;</span>
+<span class="linenos">16</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218812864246&quot;</span>
+<span class="linenos">17</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218808774242&quot;</span>
+<span class="linenos">18</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218812840741&quot;</span>
+<span class="linenos">19</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218812948132&quot;</span>
+<span class="linenos">20</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218813070154&quot;</span>
+<span class="linenos">21</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;218808222367&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h2>MonthlyArchiveCreate.ps1<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<div class="highlight-Powershell notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c"># This short script aims to create a folder in every Box user&#39;s &quot;Archived&quot; folder for the current month.</span>
+<span class="linenos"> 2</span><span class="c"># This script should be scheduled to run on the first of every month with Task Scheduler</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="c"># Get the current data and format in &#39;yyyy-mm&#39;</span>
+<span class="linenos"> 6</span><span class="no">[string]</span><span class="nv">$DATE</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Date</span> <span class="n">-Format</span> <span class="s2">&quot;yyyy-MM&quot;</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="c"># Set variable for pathname to input CSV</span>
+<span class="linenos"> 8</span><span class="no">[string]</span><span class="nv">$ArchivedFolderIDsInputPath</span> <span class="p">=</span> <span class="s2">&quot;.\Input\ArchiveFolderIDs.csv&quot;</span>
+<span class="linenos"> 9</span><span class="no">[string]</span><span class="nv">$ArchivedFolderIDsOutputPath</span> <span class="p">=</span> <span class="s2">&quot;.\Output\&quot;</span> <span class="p">+</span> <span class="p">$(</span><span class="nv">$DATE</span><span class="p">)</span> <span class="p">+</span> <span class="s2">&quot;ArchiveFolderIDs.csv&quot;</span>
+<span class="linenos">10</span><span class="no">[string]</span><span class="nv">$ArchivedFolderCreateOutputPath</span> <span class="p">=</span> <span class="s2">&quot;..\MoveO3Notes\Input\&quot;</span> <span class="p">+</span> <span class="p">$(</span><span class="nv">$DATE</span><span class="p">)</span> <span class="p">+</span> <span class="s2">&quot;ArchiveSubfolderIDs.csv&quot;</span>
+<span class="linenos">11</span><span class="c"># Set variable for result of Importing the CSV at above filepath</span>
+<span class="linenos">12</span><span class="nv">$ArchivedFolderIDs</span> <span class="p">=</span> <span class="nb">Import-Csv</span> <span class="nv">$ArchivedFolderIDsInputPath</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="c"># Set every row in the &quot;Name&quot; column of the CSV file to the formatted date.</span>
+<span class="linenos">15</span><span class="c"># Note: userprov.ps1 script should already have added the folder ID of each user&#39;s &quot;Archived&quot; folder into the CSV as the &quot;ParentID&quot;, which is where this new folder should be added.</span>
+<span class="linenos">16</span><span class="nv">$ArchivedFolderIDs</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
+<span class="linenos">17</span>    <span class="nv">$_</span><span class="p">.</span><span class="n">Name</span> <span class="p">=</span> <span class="nv">$DATE</span>
+<span class="linenos">18</span>    <span class="k">return</span> <span class="nv">$_</span>
+<span class="linenos">19</span><span class="p">}</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="c"># Save CSV file with changes</span>
+<span class="linenos">22</span><span class="nv">$ArchivedFolderIDs</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="nv">$ArchivedFolderIDsOutputPath</span> <span class="n">-NoTypeInformation</span>
+<span class="linenos">23</span><span class="c"># Run Box CLI command for provisioning folders based on the CSV</span>
+<span class="linenos">24</span><span class="nv">$folderCreateResp</span> <span class="p">=</span> <span class="p">(</span><span class="n">box</span> <span class="n">folders</span><span class="p">:</span><span class="n">create</span> <span class="p">-</span><span class="n">-bulk</span><span class="o">-file</span><span class="n">-path</span><span class="p">=</span><span class="s2">&quot;</span><span class="p">$(</span><span class="nv">$ArchivedFolderIDsOutputPath</span><span class="p">)</span><span class="s2">&quot;</span> <span class="p">-</span><span class="n">-fields</span><span class="p">=</span><span class="n">parent</span><span class="p">,</span><span class="n">id</span><span class="p">,</span><span class="n">name</span> <span class="p">-</span><span class="n">-csv</span><span class="p">)</span>
+<span class="linenos">25</span><span class="c"># Convert the API response to a PowerShell object</span>
+<span class="linenos">26</span><span class="nv">$folderCreateRespObject</span> <span class="p">=</span> <span class="nb">ConvertFrom-Csv</span> <span class="nv">$folderCreateResp</span>
+<span class="linenos">27</span><span class="c"># Export the API call returned PowerShell object to a CSV file</span>
+<span class="linenos">28</span><span class="nv">$folderCreateRespObject</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="nv">$ArchivedFolderCreateOutputPath</span> <span class="n">-NoTypeInformation</span>
+</pre></div>
+</div>
+<p>The script iterates through the CSV file, setting the entry in the name column to the current date formatted as ‘yyyy-mm’. It then exports the data to a new CSV in the /MonthlyArchiveCreate/Output/ folder called “[yyyy-mm]ArchiveFolderIDs.csv”. This modified CSV now has both the name of the new folder to be created, and the ParentID, or folder in which to place this new folder. The API call to box is then made using this modified CSV in line 24. The response from Box.com after processing the CSV is then saved and exported into the MoveO3Notes/Input/ folder, as a file called “[yyyy-mm]ArchiveSubfolderIDs.csv”.</p>
+</section>
+<section id="output-archivefolderids-csv">
+<h2>Output/ArchiveFolderIDs.csv<a class="headerlink" href="#output-archivefolderids-csv" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="s2">&quot;Name&quot;</span><span class="p">,</span><span class="s2">&quot;ParentID&quot;</span>
+<span class="linenos"> 2</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218803635894&quot;</span>
+<span class="linenos"> 3</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218803485202&quot;</span>
+<span class="linenos"> 4</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218803499602&quot;</span>
+<span class="linenos"> 5</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218803693693&quot;</span>
+<span class="linenos"> 6</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218803501368&quot;</span>
+<span class="linenos"> 7</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218812969317&quot;</span>
+<span class="linenos"> 8</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218812722987&quot;</span>
+<span class="linenos"> 9</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218807898564&quot;</span>
+<span class="linenos">10</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218808772382&quot;</span>
+<span class="linenos">11</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218812995800&quot;</span>
+<span class="linenos">12</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218809367028&quot;</span>
+<span class="linenos">13</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218813358034&quot;</span>
+<span class="linenos">14</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218807276784&quot;</span>
+<span class="linenos">15</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218813193211&quot;</span>
+<span class="linenos">16</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218812864246&quot;</span>
+<span class="linenos">17</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218808774242&quot;</span>
+<span class="linenos">18</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218812840741&quot;</span>
+<span class="linenos">19</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218812948132&quot;</span>
+<span class="linenos">20</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218813070154&quot;</span>
+<span class="linenos">21</span><span class="s2">&quot;2023-07&quot;</span><span class="p">,</span><span class="s2">&quot;218808222367&quot;</span>
+</pre></div>
+</div>
+<p>As you can see, the name column has been filled out so Box will know what name to make each of the created folders.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Userprov.html" class="btn btn-neutral float-left" title="Userprov.ps1" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="copytemplate.html" class="btn btn-neutral float-right" title="CopyTemplate.ps1" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jeffrey Samuels, Hannah Brown.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

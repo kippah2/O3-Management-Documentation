@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting Started &mdash; O3 Notes Management with Box API  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="File Structure" href="filestructure.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            O3 Notes Management with Box API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#box-cli">Box-CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#powershell">Powershell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#key-concepts">Key Concepts</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="filestructure.html">File Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scriptsoverview.html">Scripts Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Userprov.html">Userprov.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monthlyarchivecreate.html">MonthlyArchiveCreate.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copytemplate.html">CopyTemplate.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="moveo3notes.html">MoveO3Notes.ps1</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">O3 Notes Management with Box API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Getting Started</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/gettingstarted.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this heading"></a></h1>
+<p>The majority of operations involved in making this system work utilize
+Powershell scripts and the Box-CLI.</p>
+<section id="box-cli">
+<h2>Box-CLI<a class="headerlink" href="#box-cli" title="Permalink to this heading"></a></h2>
+<p>Box offers a command line interface which, by making API calls, is capable of performing most user actions that can be performed on Box.com. It is highly recommended that users familiarize themselves with the Box-CLI.</p>
+<p><em>In order to install and use the Box-CLI, you will have to follow the Box-CLI documentation to retrieve your session credentials (ClientID and Client Secret).</em></p>
+<p><a class="reference external" href="https://developer.box.com/guides/cli/quick-start/">Box CLI documentation</a>.</p>
+<p>There is also a Github page for the Box-CLI. This offers further documentation and even provides a few sample Powershell scripts.</p>
+<p><a class="reference external" href="https://github.com/box/boxcli">Box CLI Github</a>.</p>
+</section>
+<section id="powershell">
+<h2>Powershell<a class="headerlink" href="#powershell" title="Permalink to this heading"></a></h2>
+<p>Powershell was chosen as the scripting engine as its native to Windows machines and well documented.</p>
+<p>These scripts effectively manage the repository by creating and modifying CSV files with file structure information and making API calls to Box via the CLI.</p>
+<p><a class="reference external" href="https://learn.microsoft.com/en-us/powershell/">Powershell documentation</a>.</p>
+</section>
+<section id="key-concepts">
+<h2>Key Concepts<a class="headerlink" href="#key-concepts" title="Permalink to this heading"></a></h2>
+<p>The most important concepts to understand are the Powershell CSV cmdlets and the Box CLI’s <code class="docutils literal notranslate"><span class="pre">--bulk-file-path</span></code> flag.</p>
+<p>The CSV cmdlets are used for imoprting CSVs and exporting CSVs. When a CSV has been imported, Powershell will read the data as objects. Each row is an object, and each column is an attribute. This will be covered in more depth later in the documentation. The key cmdlets to learn are <code class="docutils literal notranslate"><span class="pre">Import-Csv</span></code> (<a class="reference external" href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/import-csv?view=powershell-7.3">here</a>) and <code class="docutils literal notranslate"><span class="pre">Export-Csv</span></code> (<a class="reference external" href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/export-csv?view=powershell-7.3">here</a>).</p>
+<p>Box-CLI is capable of using the <code class="docutils literal notranslate"><span class="pre">--bulk-file-path=</span></code> flag to take in a CSV filepath as an argument. Box will then perform the desired action, iterating through each row of the CSV. There are various examples of how to format these CSVs on the <a class="reference external" href="https://github.com/box/boxcli/tree/main/docs/Bulk%20actions">Github page</a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="filestructure.html" class="btn btn-neutral float-right" title="File Structure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jeffrey Samuels, Hannah Brown.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
