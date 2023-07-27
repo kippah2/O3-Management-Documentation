@@ -33,8 +33,35 @@ These scripts effectively manage the repository by creating and modifying CSV fi
 
 Key Concepts
 ------------
-The most important concepts to understand are the Powershell CSV cmdlets and the Box CLI's ``--bulk-file-path`` flag.
+The most important concepts to understand are the Powershell CSV cmdlets and the Box CLI's ``--bulk-file-path=`` flag.
 
 The CSV cmdlets are used for imoprting CSVs and exporting CSVs. When a CSV has been imported, Powershell will read the data as objects. Each row is an object, and each column is an attribute. This will be covered in more depth later in the documentation. The key cmdlets to learn are ``Import-Csv`` (`here <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/import-csv?view=powershell-7.3>`_) and ``Export-Csv`` (`here <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/export-csv?view=powershell-7.3>`_).
 
 Box-CLI is capable of using the ``--bulk-file-path=`` flag to take in a CSV filepath as an argument. Box will then perform the desired action, iterating through each row of the CSV. There are various examples of how to format these CSVs on the `Github page <https://github.com/box/boxcli/tree/main/docs/Bulk%20actions>`_.
+
+Task Scheduler
+--------------
+
+The Windows Task Scheduler should be configured to run these scripts on a scheduled basis.
+
+To do this:
+	1. Open Task Scheduler.
+	2. Click 'Create Task'.
+	3. Name task based on script name
+	4. Ensure the user account is the one which is logged into the Box CLI with a Box superadministrator account.
+	5. Select 'Run whether user is logged on or not'.
+	6. At "Configure for" select 'Windows 10'.
+	7. Select 'Triggers' tab.
+	8. At "Begin the task:" select 'On a schedule'.
+	9. At "Months" select '<Select all months>'.
+	10. At "Days:" select '1'.
+	11. Click 'Ok'.
+	12. Select 'Actions' tab.
+	13. Click 'New...'.
+	14. At "Action" select 'Start a program'.
+	15. At "Program/Script" select 'Browse'.
+	16. Navigate to and select 'MonthlyArchiveCreate.ps1'.
+	17. At "Start in", input the folderpath that houses the script being run. For example: ``C:\Users\jeffrey.samuels\Desktop\BoxTestBuild\MonthlyArchiveCreate``.
+	18. Click 'Ok' then 'Ok'.
+
+You have now successfully scheduled the MonthlyArchiveCreate.ps1 script to run at the first of every month. Repeat this process, setting CopyTemplate.ps1 to run every Sunday and MoveO3Notes to run on the last of the month.

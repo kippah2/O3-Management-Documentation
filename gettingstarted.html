@@ -49,6 +49,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#box-cli">Box-CLI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#powershell">Powershell</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#key-concepts">Key Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#task-scheduler">Task Scheduler</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="filestructure.html">File Structure</a></li>
@@ -103,9 +104,37 @@ Powershell scripts and the Box-CLI.</p>
 </section>
 <section id="key-concepts">
 <h2>Key Concepts<a class="headerlink" href="#key-concepts" title="Permalink to this heading"></a></h2>
-<p>The most important concepts to understand are the Powershell CSV cmdlets and the Box CLI’s <code class="docutils literal notranslate"><span class="pre">--bulk-file-path</span></code> flag.</p>
+<p>The most important concepts to understand are the Powershell CSV cmdlets and the Box CLI’s <code class="docutils literal notranslate"><span class="pre">--bulk-file-path=</span></code> flag.</p>
 <p>The CSV cmdlets are used for imoprting CSVs and exporting CSVs. When a CSV has been imported, Powershell will read the data as objects. Each row is an object, and each column is an attribute. This will be covered in more depth later in the documentation. The key cmdlets to learn are <code class="docutils literal notranslate"><span class="pre">Import-Csv</span></code> (<a class="reference external" href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/import-csv?view=powershell-7.3">here</a>) and <code class="docutils literal notranslate"><span class="pre">Export-Csv</span></code> (<a class="reference external" href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/export-csv?view=powershell-7.3">here</a>).</p>
 <p>Box-CLI is capable of using the <code class="docutils literal notranslate"><span class="pre">--bulk-file-path=</span></code> flag to take in a CSV filepath as an argument. Box will then perform the desired action, iterating through each row of the CSV. There are various examples of how to format these CSVs on the <a class="reference external" href="https://github.com/box/boxcli/tree/main/docs/Bulk%20actions">Github page</a>.</p>
+</section>
+<section id="task-scheduler">
+<h2>Task Scheduler<a class="headerlink" href="#task-scheduler" title="Permalink to this heading"></a></h2>
+<p>The Windows Task Scheduler should be configured to run these scripts on a scheduled basis.</p>
+<dl class="simple">
+<dt>To do this:</dt><dd><ol class="arabic simple">
+<li><p>Open Task Scheduler.</p></li>
+<li><p>Click ‘Create Task’.</p></li>
+<li><p>Name task based on script name</p></li>
+<li><p>Ensure the user account is the one which is logged into the Box CLI with a Box superadministrator account.</p></li>
+<li><p>Select ‘Run whether user is logged on or not’.</p></li>
+<li><p>At “Configure for” select ‘Windows 10’.</p></li>
+<li><p>Select ‘Triggers’ tab.</p></li>
+<li><p>At “Begin the task:” select ‘On a schedule’.</p></li>
+<li><p>At “Months” select ‘&lt;Select all months&gt;’.</p></li>
+<li><p>At “Days:” select ‘1’.</p></li>
+<li><p>Click ‘Ok’.</p></li>
+<li><p>Select ‘Actions’ tab.</p></li>
+<li><p>Click ‘New…’.</p></li>
+<li><p>At “Action” select ‘Start a program’.</p></li>
+<li><p>At “Program/Script” select ‘Browse’.</p></li>
+<li><p>Navigate to and select ‘MonthlyArchiveCreate.ps1’.</p></li>
+<li><p>At “Start in”, input the folderpath that houses the script being run. For example: <code class="docutils literal notranslate"><span class="pre">C:\Users\jeffrey.samuels\Desktop\BoxTestBuild\MonthlyArchiveCreate</span></code>.</p></li>
+<li><p>Click ‘Ok’ then ‘Ok’.</p></li>
+</ol>
+</dd>
+</dl>
+<p>You have now successfully scheduled the MonthlyArchiveCreate.ps1 script to run at the first of every month. Repeat this process, setting CopyTemplate.ps1 to run every Sunday and MoveO3Notes to run on the last of the month.</p>
 </section>
 </section>
 
