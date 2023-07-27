@@ -1,0 +1,54 @@
+Get-AD-Users.ps1
+================
+
+The Get-AD-Users.ps1 script is used to retrieve user information from Active Directory. It then outputs the get-users.csv file which will be used as input in the Userprov.ps1 script.
+
+.. code-block:: Powershell
+	:linenos:
+
+	# Import the Active Directory module
+	Import-Module ActiveDirectory
+
+	# Set the output file path
+	$csvPath = ".\Output\Get-User.csv"
+
+	# Set the distinguished name (DN) of the target OU
+	$ouDN = "OU=NorCalUser,DC=Truebeck,DC=com"
+
+	# Retrieve user objects from the specified OU with selected properties
+	$users = Get-ADUser -Filter * -SearchBase $ouDN -Properties GivenName, Surname, EmailAddress, Manager
+
+	# Create a custom property for the concatenated field and manager details
+	$users | Select-Object @{Name="firstName"; Expression={$_.GivenName}},
+	                     @{Name="lastName"; Expression={$_.Surname}},
+	                     @{Name="email"; Expression={
+	                         if ($_.EmailAddress) {
+	                             $_.EmailAddress
+	                         } elseif ($_.ObjectClass -eq "user") {
+	                             $defaultEmail = "{0}.{1}@truebeck.com" -f $_.GivenName, $_.Surname
+	                             $defaultEmail
+	                         } else {
+	                             ""
+	                         }
+	                     }},
+	                     @{Name="username"; Expression={($_.GivenName + $_.Surname) -replace '\s+' -replace '(.+)','$1'.ToLower()}},
+	                     @{Name="managerEmail"; Expression={(Get-ADUser -Identity $_.Manager -Properties EmailAddress).EmailAddress}},
+	                     @{Name="manager"; Expression={"{0} {1}" -f (Get-ADUser -Identity $_.Manager -Properties GivenName, Surname).GivenName, (Get-ADUser -Identity $_.Manager -Properties GivenName, Surname).Surname}} |
+	    Export-Csv -Path $csvPath -NoTypeInformation
+
+	# Read the CSV file contents
+	$csvContent = Get-Content -Path $csvPath
+
+	# Modify the CSV content to concatenate firstName and lastName fields
+	$modifiedCsvContent = $csvContent | ForEach-Object {
+	    $modifiedLine = $_ -replace '"firstName","lastName"', '"fullName"'
+	    $_ -replace '^"([^"]+)","([^"]+)","([^"]+)","([^"]+)","([^"]+)"$', "`"$1 $2`",$3,$4,$5`""
+	}
+
+	# Save the modified CSV content back to the file
+	$modifiedCsvContent | Set-Content -Path $csvPath
+
+	# Display a confirmation message
+	Write-Host "User export complete. CSV file created at: $csvPath"
+
+The output file will contain columns for ``"firstName","lastName","email","username","managerEmail","manager"``. The username column is the firstName appended to the lastName, which is the username Box will give to these users. The manager and managerEmail columns are used for provisioning the user account for that employee's supervisor. This is important becaused in the Userprov.ps1 script, the supervisor will be added as a collaborator to each employee's folder.

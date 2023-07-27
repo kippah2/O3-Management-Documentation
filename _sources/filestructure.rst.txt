@@ -3,6 +3,7 @@
 .. /monthlyarchivecreate
 .. /copytemplate
 .. /moveo3notes
+.. /getadusers
 File Structure
 ==============
 

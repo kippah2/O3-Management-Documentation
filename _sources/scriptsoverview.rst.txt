@@ -2,11 +2,12 @@
 .. /monthlyarchivecreate
 .. /copytemplate
 .. /moveo3notes
+.. /getadusers
 Scripts Overview
 ================
 
 There are 5 scripts that are responsible for maintaining this system. 
-	1. Get-AD-Users.ps1
+	1. `Get-AD-Users.ps1 <getadusers.html>`_
 	2. `UserProv.ps1 <Userprov.html>`_
 	3. `MonthlyArchiveCreate.ps1 <monthlyarchivecreate.html>`_
 	4. `CopyTemplate.ps1 <copytemplate.html>`_

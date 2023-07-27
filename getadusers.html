@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get-AD-Users.ps1 &mdash; O3 Notes Management with Box API  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Userprov.ps1" href="Userprov.html" />
+    <link rel="prev" title="Scripts Overview" href="scriptsoverview.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            O3 Notes Management with Box API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filestructure.html">File Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scriptsoverview.html">Scripts Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Get-AD-Users.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Userprov.html">Userprov.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monthlyarchivecreate.html">MonthlyArchiveCreate.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copytemplate.html">CopyTemplate.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="moveo3notes.html">MoveO3Notes.ps1</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">O3 Notes Management with Box API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Get-AD-Users.ps1</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/getadusers.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="get-ad-users-ps1">
+<h1>Get-AD-Users.ps1<a class="headerlink" href="#get-ad-users-ps1" title="Permalink to this heading"></a></h1>
+<p>The Get-AD-Users.ps1 script is used to retrieve user information from Active Directory. It then outputs the get-users.csv file which will be used as input in the Userprov.ps1 script.</p>
+<div class="highlight-Powershell notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c"># Import the Active Directory module</span>
+<span class="linenos"> 2</span><span class="nb">Import-Module</span> <span class="n">ActiveDirectory</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c"># Set the output file path</span>
+<span class="linenos"> 5</span><span class="nv">$csvPath</span> <span class="p">=</span> <span class="s2">&quot;.\Output\Get-User.csv&quot;</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c"># Set the distinguished name (DN) of the target OU</span>
+<span class="linenos"> 8</span><span class="nv">$ouDN</span> <span class="p">=</span> <span class="s2">&quot;OU=NorCalUser,DC=Truebeck,DC=com&quot;</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c"># Retrieve user objects from the specified OU with selected properties</span>
+<span class="linenos">11</span><span class="nv">$users</span> <span class="p">=</span> <span class="nb">Get-ADUser</span> <span class="n">-Filter</span> <span class="p">*</span> <span class="n">-SearchBase</span> <span class="nv">$ouDN</span> <span class="n">-Properties</span> <span class="n">GivenName</span><span class="p">,</span> <span class="n">Surname</span><span class="p">,</span> <span class="n">EmailAddress</span><span class="p">,</span> <span class="n">Manager</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="c"># Create a custom property for the concatenated field and manager details</span>
+<span class="linenos">14</span><span class="nv">$users</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="p">@{</span><span class="n">Name</span><span class="p">=</span><span class="s2">&quot;firstName&quot;</span><span class="p">;</span> <span class="n">Expression</span><span class="p">={</span><span class="nv">$_</span><span class="p">.</span><span class="n">GivenName</span><span class="p">}},</span>
+<span class="linenos">15</span>                     <span class="p">@{</span><span class="n">Name</span><span class="p">=</span><span class="s2">&quot;lastName&quot;</span><span class="p">;</span> <span class="n">Expression</span><span class="p">={</span><span class="nv">$_</span><span class="p">.</span><span class="n">Surname</span><span class="p">}},</span>
+<span class="linenos">16</span>                     <span class="p">@{</span><span class="n">Name</span><span class="p">=</span><span class="s2">&quot;email&quot;</span><span class="p">;</span> <span class="n">Expression</span><span class="p">={</span>
+<span class="linenos">17</span>                         <span class="k">if</span> <span class="p">(</span><span class="nv">$_</span><span class="p">.</span><span class="n">EmailAddress</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">18</span>                             <span class="nv">$_</span><span class="p">.</span><span class="n">EmailAddress</span>
+<span class="linenos">19</span>                         <span class="p">}</span> <span class="k">elseif</span> <span class="p">(</span><span class="nv">$_</span><span class="p">.</span><span class="n">ObjectClass</span> <span class="o">-eq</span> <span class="s2">&quot;user&quot;</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">20</span>                             <span class="nv">$defaultEmail</span> <span class="p">=</span> <span class="s2">&quot;{0}.{1}@truebeck.com&quot;</span> <span class="o">-f</span> <span class="nv">$_</span><span class="p">.</span><span class="n">GivenName</span><span class="p">,</span> <span class="nv">$_</span><span class="p">.</span><span class="n">Surname</span>
+<span class="linenos">21</span>                             <span class="nv">$defaultEmail</span>
+<span class="linenos">22</span>                         <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+<span class="linenos">23</span>                             <span class="s2">&quot;&quot;</span>
+<span class="linenos">24</span>                         <span class="p">}</span>
+<span class="linenos">25</span>                     <span class="p">}},</span>
+<span class="linenos">26</span>                     <span class="p">@{</span><span class="n">Name</span><span class="p">=</span><span class="s2">&quot;username&quot;</span><span class="p">;</span> <span class="n">Expression</span><span class="p">={(</span><span class="nv">$_</span><span class="p">.</span><span class="n">GivenName</span> <span class="p">+</span> <span class="nv">$_</span><span class="p">.</span><span class="n">Surname</span><span class="p">)</span> <span class="o">-replace</span> <span class="s1">&#39;\s+&#39;</span> <span class="o">-replace</span> <span class="s1">&#39;(.+)&#39;</span><span class="p">,</span><span class="s1">&#39;$1&#39;</span><span class="p">.</span><span class="n">ToLower</span><span class="p">()}},</span>
+<span class="linenos">27</span>                     <span class="p">@{</span><span class="n">Name</span><span class="p">=</span><span class="s2">&quot;managerEmail&quot;</span><span class="p">;</span> <span class="n">Expression</span><span class="p">={(</span><span class="nb">Get-ADUser</span> <span class="n">-Identity</span> <span class="nv">$_</span><span class="p">.</span><span class="n">Manager</span> <span class="n">-Properties</span> <span class="n">EmailAddress</span><span class="p">).</span><span class="n">EmailAddress</span><span class="p">}},</span>
+<span class="linenos">28</span>                     <span class="p">@{</span><span class="n">Name</span><span class="p">=</span><span class="s2">&quot;manager&quot;</span><span class="p">;</span> <span class="n">Expression</span><span class="p">={</span><span class="s2">&quot;{0} {1}&quot;</span> <span class="o">-f</span> <span class="p">(</span><span class="nb">Get-ADUser</span> <span class="n">-Identity</span> <span class="nv">$_</span><span class="p">.</span><span class="n">Manager</span> <span class="n">-Properties</span> <span class="n">GivenName</span><span class="p">,</span> <span class="n">Surname</span><span class="p">).</span><span class="n">GivenName</span><span class="p">,</span> <span class="p">(</span><span class="nb">Get-ADUser</span> <span class="n">-Identity</span> <span class="nv">$_</span><span class="p">.</span><span class="n">Manager</span> <span class="n">-Properties</span> <span class="n">GivenName</span><span class="p">,</span> <span class="n">Surname</span><span class="p">).</span><span class="n">Surname</span><span class="p">}}</span> <span class="p">|</span>
+<span class="linenos">29</span>    <span class="nb">Export-Csv</span> <span class="n">-Path</span> <span class="nv">$csvPath</span> <span class="n">-NoTypeInformation</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span><span class="c"># Read the CSV file contents</span>
+<span class="linenos">32</span><span class="nv">$csvContent</span> <span class="p">=</span> <span class="nb">Get-Content</span> <span class="n">-Path</span> <span class="nv">$csvPath</span>
+<span class="linenos">33</span>
+<span class="linenos">34</span><span class="c"># Modify the CSV content to concatenate firstName and lastName fields</span>
+<span class="linenos">35</span><span class="nv">$modifiedCsvContent</span> <span class="p">=</span> <span class="nv">$csvContent</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
+<span class="linenos">36</span>    <span class="nv">$modifiedLine</span> <span class="p">=</span> <span class="nv">$_</span> <span class="o">-replace</span> <span class="s1">&#39;&quot;firstName&quot;,&quot;lastName&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&quot;fullName&quot;&#39;</span>
+<span class="linenos">37</span>    <span class="nv">$_</span> <span class="o">-replace</span> <span class="s1">&#39;^&quot;([^&quot;]+)&quot;,&quot;([^&quot;]+)&quot;,&quot;([^&quot;]+)&quot;,&quot;([^&quot;]+)&quot;,&quot;([^&quot;]+)&quot;$&#39;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">`&quot;</span><span class="s2">$1 $2</span><span class="se">`&quot;</span><span class="s2">,$3,$4,$5</span><span class="se">`&quot;</span><span class="s2">&quot;</span>
+<span class="linenos">38</span><span class="p">}</span>
+<span class="linenos">39</span>
+<span class="linenos">40</span><span class="c"># Save the modified CSV content back to the file</span>
+<span class="linenos">41</span><span class="nv">$modifiedCsvContent</span> <span class="p">|</span> <span class="nb">Set-Content</span> <span class="n">-Path</span> <span class="nv">$csvPath</span>
+<span class="linenos">42</span>
+<span class="linenos">43</span><span class="c"># Display a confirmation message</span>
+<span class="linenos">44</span><span class="nb">Write-Host</span> <span class="s2">&quot;User export complete. CSV file created at: $csvPath&quot;</span>
+</pre></div>
+</div>
+<p>The output file will contain columns for <code class="docutils literal notranslate"><span class="pre">&quot;firstName&quot;,&quot;lastName&quot;,&quot;email&quot;,&quot;username&quot;,&quot;managerEmail&quot;,&quot;manager&quot;</span></code>. The username column is the firstName appended to the lastName, which is the username Box will give to these users. The manager and managerEmail columns are used for provisioning the user account for that employee’s supervisor. This is important becaused in the Userprov.ps1 script, the supervisor will be added as a collaborator to each employee’s folder.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="scriptsoverview.html" class="btn btn-neutral float-left" title="Scripts Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Userprov.html" class="btn btn-neutral float-right" title="Userprov.ps1" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jeffrey Samuels, Hannah Brown.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -14,6 +14,7 @@ Welcome to O3 Notes Management with Box API's documentation!
    /gettingstarted
    /filestructure
    /scriptsoverview
+   /getadusers
    /Userprov
    /monthlyarchivecreate
    /copytemplate

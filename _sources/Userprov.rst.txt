@@ -2,6 +2,7 @@
 .. /monthlyarchivecreate
 .. /copytemplate
 .. /moveo3notes
+.. /getadusers
 Userprov.ps1
 ============
 
