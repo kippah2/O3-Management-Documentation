@@ -3,15 +3,17 @@
 .. /copytemplate
 .. /moveo3notes
 .. /getadusers
+.. /reportpipeline
 Scripts Overview
 ================
 
-There are 5 scripts that are responsible for maintaining this system. 
+There are 6 scripts that are responsible for maintaining this system. 
 	1. `Get-AD-Users.ps1 <getadusers.html>`_
 	2. `UserProv.ps1 <Userprov.html>`_
 	3. `MonthlyArchiveCreate.ps1 <monthlyarchivecreate.html>`_
 	4. `CopyTemplate.ps1 <copytemplate.html>`_
 	5. `MoveO3Notes.ps1 <moveo3notes.html>`_
+	6. `ReportPipeline.ps1 <reportpipeline.html`_
 
 Scheduling
 ----------
@@ -19,15 +21,17 @@ Scheduling
 There is a specific order these scripts should be run. This can be set with Windows Task Scheduler.
 
 	* Get-AD-Users.ps1
-		* Whenever new people are added to the organization, run this script before running Userprov.ps1
+		* Whenever new people are added to the organization, run this script before running Userprov.ps1.
 	* Userprov.ps1
 		* Whenever new people are added to the organization.
 	* MonthlyArchiveCreate.ps1
 		* On the first of each month.
 	* CopyTemplate.ps1
-		* Every Sunday
+		* Every Sunday.
 	* MoveO3Notes.ps1
 		* On the last day of each month.
+	* ReportPipeline.ps1
+		* Every Sunday, later in the day, after the report has been generated.
 
 Inputs and Outputs
 ------------------

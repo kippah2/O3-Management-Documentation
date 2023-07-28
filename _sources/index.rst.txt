@@ -19,6 +19,7 @@ Welcome to O3 Notes Management with Box API's documentation!
    /monthlyarchivecreate
    /copytemplate
    /moveo3notes
+   /reportpipeline
 
 
 

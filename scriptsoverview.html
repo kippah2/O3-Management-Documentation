@@ -57,6 +57,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monthlyarchivecreate.html">MonthlyArchiveCreate.ps1</a></li>
 <li class="toctree-l1"><a class="reference internal" href="copytemplate.html">CopyTemplate.ps1</a></li>
 <li class="toctree-l1"><a class="reference internal" href="moveo3notes.html">MoveO3Notes.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reportpipeline.html">ReportPipeline.ps1</a></li>
 </ul>
 
         </div>
@@ -86,12 +87,13 @@
   <section id="scripts-overview">
 <h1>Scripts Overview<a class="headerlink" href="#scripts-overview" title="Permalink to this heading"></a></h1>
 <dl class="simple">
-<dt>There are 5 scripts that are responsible for maintaining this system.</dt><dd><ol class="arabic simple">
+<dt>There are 6 scripts that are responsible for maintaining this system.</dt><dd><ol class="arabic simple">
 <li><p><a class="reference external" href="getadusers.html">Get-AD-Users.ps1</a></p></li>
 <li><p><a class="reference external" href="Userprov.html">UserProv.ps1</a></p></li>
 <li><p><a class="reference external" href="monthlyarchivecreate.html">MonthlyArchiveCreate.ps1</a></p></li>
 <li><p><a class="reference external" href="copytemplate.html">CopyTemplate.ps1</a></p></li>
 <li><p><a class="reference external" href="moveo3notes.html">MoveO3Notes.ps1</a></p></li>
+<li><p><a href="#id1"><span class="problematic" id="id2">`ReportPipeline.ps1 &lt;reportpipeline.html`_</span></a></p></li>
 </ol>
 </dd>
 </dl>
@@ -102,7 +104,7 @@
 <div><ul class="simple">
 <li><dl class="simple">
 <dt>Get-AD-Users.ps1</dt><dd><ul>
-<li><p>Whenever new people are added to the organization, run this script before running Userprov.ps1</p></li>
+<li><p>Whenever new people are added to the organization, run this script before running Userprov.ps1.</p></li>
 </ul>
 </dd>
 </dl>
@@ -123,7 +125,7 @@
 </li>
 <li><dl class="simple">
 <dt>CopyTemplate.ps1</dt><dd><ul>
-<li><p>Every Sunday</p></li>
+<li><p>Every Sunday.</p></li>
 </ul>
 </dd>
 </dl>
@@ -131,6 +133,13 @@
 <li><dl class="simple">
 <dt>MoveO3Notes.ps1</dt><dd><ul>
 <li><p>On the last day of each month.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ReportPipeline.ps1</dt><dd><ul>
+<li><p>Every Sunday, later in the day, after the report has been generated.</p></li>
 </ul>
 </dd>
 </dl>

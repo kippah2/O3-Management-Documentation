@@ -4,6 +4,7 @@
 .. /copytemplate
 .. /moveo3notes
 .. /getadusers
+.. /reportpipeline
 Introduction
 ===============
 

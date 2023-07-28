@@ -1,3 +1,4 @@
+.. /reportpipeline
 Get-AD-Users.ps1
 ================
 

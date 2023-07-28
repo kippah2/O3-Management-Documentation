@@ -1,0 +1,118 @@
+ReportPipeline.ps1
+==================
+
+The reportpipeline.ps1 script is important as it is responsible for retrieveing the last created report from Box and 
+moving it into a shared folder. The report is then pulled from this folder by the data team to be used as input into 
+PowerBI for the dashboard.
+
+.. code-block:: Powershell
+	:linenos:
+
+	# When using this file, make sure to change the $BoxApiToken, $ParentFolderID, $LocalFolderPath, and $destinationFolder
+
+	# Set Box API token and folder ID
+	$BoxApiToken = "OikiKdoUdQOqKPF0eF90UVF0053hbmg1"
+	$ParentFolderId = "218661172585"
+
+	# Function to get the last created subfolder in a Box folder
+	function Get-LastCreatedSubfolder {
+	    param (
+	        [string]$Token,
+	        [string]$ParentFolderId
+	    )
+
+	    $header = @{
+	        Authorization = "Bearer $Token"
+	    }
+
+	    $uri = "https://api.box.com/2.0/folders/$ParentFolderId/items?sort=date"
+	    $response = Invoke-RestMethod -Uri $uri -Headers $header -Method Get
+
+	    $lastCreatedSubfolder = $response.entries | Where-Object { $_.type -eq "folder" } | Sort-Object created_at -Descending | Select-Object -First 1
+	    return $lastCreatedSubfolder
+	}
+
+	# Function to get the last created file in a Box folder
+	function Get-LastCreatedFile {
+	    param (
+	        [string]$Token,
+	        [string]$FolderId
+	    )
+
+	    $header = @{
+	        Authorization = "Bearer $Token"
+	    }
+
+	    $uri = "https://api.box.com/2.0/folders/$FolderId/items?sort=date"
+	    $response = Invoke-RestMethod -Uri $uri -Headers $header -Method Get
+
+	    $lastCreatedFile = $response.entries | Where-Object { $_.type -eq "file" } | Sort-Object created_at -Descending | Select-Object -First 1
+	    return $lastCreatedFile
+	}
+
+	# Function to download a file from Box
+	function Download-BoxFile {
+	    param (
+	        [string]$Token,
+	        [string]$FileId,
+	        [string]$DownloadPath
+	    )
+
+	    $header = @{
+	        Authorization = "Bearer $Token"
+	    }
+
+	    $uri = "https://api.box.com/2.0/files/$FileId/content"
+	    Invoke-RestMethod -Uri $uri -Headers $header -Method Get -OutFile $DownloadPath
+	}
+
+	# Set the path where you want to save the downloaded report
+	$LocalFolderPath = ".\ReportsDownloaded"
+
+	# Get the last created subfolder in the Box folder
+	$lastCreatedSubfolder = Get-LastCreatedSubfolder -Token $BoxApiToken -ParentFolderId $ParentFolderId
+
+	if ($lastCreatedSubfolder) {
+	    $subfolderName = $lastCreatedSubfolder.name
+	    $subfolderId = $lastCreatedSubfolder.id
+
+	    # Get the last created file in the subfolder
+	    $lastCreatedFile = Get-LastCreatedFile -Token $BoxApiToken -FolderId $subfolderId
+
+	    if ($lastCreatedFile) {
+	        $reportName = $lastCreatedFile.name
+	        $reportId = $lastCreatedFile.id
+
+	        # Create the full download path for the report
+	        $downloadPath = Join-Path -Path $LocalFolderPath -ChildPath $reportName
+
+	        # Download the report from Box
+	        Download-BoxFile -Token $BoxApiToken -FileId $reportId -DownloadPath $downloadPath
+
+	        Write-Host "Report '$reportName' downloaded successfully."
+
+	        # Move the downloaded report to a specific folder on your machine
+	        $destinationFolder = "C:\Users\jeffrey.samuels\Box\O3 Tracking Uploads\01_Received (upload csv files here)"
+	        $destinationPath = Join-Path -Path $destinationFolder -ChildPath $reportName
+	        Move-Item -Path $downloadPath -Destination $destinationPath
+
+	        Write-Host "Report '$reportName' moved to '$destinationPath'."
+	    }
+	    else {
+	        Write-Host "No files found in the subfolder."
+	    }
+	}
+	else {
+	    Write-Host "No subfolders found in the Box parent folder."
+	}
+
+
+The script requires an API token. To retrieve this token:
+
+	1. Go to Box.com
+	2. In the bottom left of the blue sidebar, click "Dev Console".
+	3. Click on the relevant Box CLI App (you can check creation date for the latest).
+	4. Click the "Configuration" tab.
+	5. Click "Generate Developer Token".
+	6. Click "Copy"
+	7. Paste API token in powershell script's $BoxAPIToken variable.

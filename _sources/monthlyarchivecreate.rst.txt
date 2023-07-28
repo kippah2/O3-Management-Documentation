@@ -1,6 +1,7 @@
 .. /copytemplate
 .. /moveo3notes
 .. /getadusers
+.. /reportpipeline
 MonthlyArchiveCreate.ps1
 ========================
 

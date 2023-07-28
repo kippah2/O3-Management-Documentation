@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReportPipeline.ps1 &mdash; O3 Notes Management with Box API  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="MoveO3Notes.ps1" href="moveo3notes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            O3 Notes Management with Box API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filestructure.html">File Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scriptsoverview.html">Scripts Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getadusers.html">Get-AD-Users.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Userprov.html">Userprov.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monthlyarchivecreate.html">MonthlyArchiveCreate.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copytemplate.html">CopyTemplate.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="moveo3notes.html">MoveO3Notes.ps1</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ReportPipeline.ps1</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">O3 Notes Management with Box API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ReportPipeline.ps1</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/reportpipeline.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="reportpipeline-ps1">
+<h1>ReportPipeline.ps1<a class="headerlink" href="#reportpipeline-ps1" title="Permalink to this heading"></a></h1>
+<p>The reportpipeline.ps1 script is important as it is responsible for retrieveing the last created report from Box and
+moving it into a shared folder. The report is then pulled from this folder by the data team to be used as input into
+PowerBI for the dashboard.</p>
+<div class="highlight-Powershell notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c"># When using this file, make sure to change the $BoxApiToken, $ParentFolderID, $LocalFolderPath, and $destinationFolder</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="c"># Set Box API token and folder ID</span>
+<span class="linenos"> 4</span><span class="nv">$BoxApiToken</span> <span class="p">=</span> <span class="s2">&quot;OikiKdoUdQOqKPF0eF90UVF0053hbmg1&quot;</span>
+<span class="linenos"> 5</span><span class="nv">$ParentFolderId</span> <span class="p">=</span> <span class="s2">&quot;218661172585&quot;</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c"># Function to get the last created subfolder in a Box folder</span>
+<span class="linenos"> 8</span><span class="k">function</span> <span class="nb">Get-LastCreatedSubfolder</span> <span class="p">{</span>
+<span class="linenos"> 9</span>    <span class="k">param</span> <span class="p">(</span>
+<span class="linenos">10</span>        <span class="no">[string]</span><span class="nv">$Token</span><span class="p">,</span>
+<span class="linenos">11</span>        <span class="no">[string]</span><span class="nv">$ParentFolderId</span>
+<span class="linenos">12</span>    <span class="p">)</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="nv">$header</span> <span class="p">=</span> <span class="p">@{</span>
+<span class="linenos">15</span>        <span class="n">Authorization</span> <span class="p">=</span> <span class="s2">&quot;Bearer $Token&quot;</span>
+<span class="linenos">16</span>    <span class="p">}</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span>    <span class="nv">$uri</span> <span class="p">=</span> <span class="s2">&quot;https://api.box.com/2.0/folders/$ParentFolderId/items?sort=date&quot;</span>
+<span class="linenos">19</span>    <span class="nv">$response</span> <span class="p">=</span> <span class="nb">Invoke-RestMethod</span> <span class="n">-Uri</span> <span class="nv">$uri</span> <span class="n">-Headers</span> <span class="nv">$header</span> <span class="n">-Method</span> <span class="n">Get</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span>    <span class="nv">$lastCreatedSubfolder</span> <span class="p">=</span> <span class="nv">$response</span><span class="p">.</span><span class="n">entries</span> <span class="p">|</span> <span class="nb">Where-Object</span> <span class="p">{</span> <span class="nv">$_</span><span class="p">.</span><span class="nb">type </span><span class="o">-eq</span> <span class="s2">&quot;folder&quot;</span> <span class="p">}</span> <span class="p">|</span> <span class="nb">Sort-Object</span> <span class="n">created_at</span> <span class="n">-Descending</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">-First</span> <span class="n">1</span>
+<span class="linenos">22</span>    <span class="k">return</span> <span class="nv">$lastCreatedSubfolder</span>
+<span class="linenos">23</span><span class="p">}</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span><span class="c"># Function to get the last created file in a Box folder</span>
+<span class="linenos">26</span><span class="k">function</span> <span class="nb">Get-LastCreatedFile</span> <span class="p">{</span>
+<span class="linenos">27</span>    <span class="k">param</span> <span class="p">(</span>
+<span class="linenos">28</span>        <span class="no">[string]</span><span class="nv">$Token</span><span class="p">,</span>
+<span class="linenos">29</span>        <span class="no">[string]</span><span class="nv">$FolderId</span>
+<span class="linenos">30</span>    <span class="p">)</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span>    <span class="nv">$header</span> <span class="p">=</span> <span class="p">@{</span>
+<span class="linenos">33</span>        <span class="n">Authorization</span> <span class="p">=</span> <span class="s2">&quot;Bearer $Token&quot;</span>
+<span class="linenos">34</span>    <span class="p">}</span>
+<span class="linenos">35</span>
+<span class="linenos">36</span>    <span class="nv">$uri</span> <span class="p">=</span> <span class="s2">&quot;https://api.box.com/2.0/folders/$FolderId/items?sort=date&quot;</span>
+<span class="linenos">37</span>    <span class="nv">$response</span> <span class="p">=</span> <span class="nb">Invoke-RestMethod</span> <span class="n">-Uri</span> <span class="nv">$uri</span> <span class="n">-Headers</span> <span class="nv">$header</span> <span class="n">-Method</span> <span class="n">Get</span>
+<span class="linenos">38</span>
+<span class="linenos">39</span>    <span class="nv">$lastCreatedFile</span> <span class="p">=</span> <span class="nv">$response</span><span class="p">.</span><span class="n">entries</span> <span class="p">|</span> <span class="nb">Where-Object</span> <span class="p">{</span> <span class="nv">$_</span><span class="p">.</span><span class="nb">type </span><span class="o">-eq</span> <span class="s2">&quot;file&quot;</span> <span class="p">}</span> <span class="p">|</span> <span class="nb">Sort-Object</span> <span class="n">created_at</span> <span class="n">-Descending</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">-First</span> <span class="n">1</span>
+<span class="linenos">40</span>    <span class="k">return</span> <span class="nv">$lastCreatedFile</span>
+<span class="linenos">41</span><span class="p">}</span>
+<span class="linenos">42</span>
+<span class="linenos">43</span><span class="c"># Function to download a file from Box</span>
+<span class="linenos">44</span><span class="k">function</span> <span class="n">Download-BoxFile</span> <span class="p">{</span>
+<span class="linenos">45</span>    <span class="k">param</span> <span class="p">(</span>
+<span class="linenos">46</span>        <span class="no">[string]</span><span class="nv">$Token</span><span class="p">,</span>
+<span class="linenos">47</span>        <span class="no">[string]</span><span class="nv">$FileId</span><span class="p">,</span>
+<span class="linenos">48</span>        <span class="no">[string]</span><span class="nv">$DownloadPath</span>
+<span class="linenos">49</span>    <span class="p">)</span>
+<span class="linenos">50</span>
+<span class="linenos">51</span>    <span class="nv">$header</span> <span class="p">=</span> <span class="p">@{</span>
+<span class="linenos">52</span>        <span class="n">Authorization</span> <span class="p">=</span> <span class="s2">&quot;Bearer $Token&quot;</span>
+<span class="linenos">53</span>    <span class="p">}</span>
+<span class="linenos">54</span>
+<span class="linenos">55</span>    <span class="nv">$uri</span> <span class="p">=</span> <span class="s2">&quot;https://api.box.com/2.0/files/$FileId/content&quot;</span>
+<span class="linenos">56</span>    <span class="nb">Invoke-RestMethod</span> <span class="n">-Uri</span> <span class="nv">$uri</span> <span class="n">-Headers</span> <span class="nv">$header</span> <span class="n">-Method</span> <span class="n">Get</span> <span class="n">-OutFile</span> <span class="nv">$DownloadPath</span>
+<span class="linenos">57</span><span class="p">}</span>
+<span class="linenos">58</span>
+<span class="linenos">59</span><span class="c"># Set the path where you want to save the downloaded report</span>
+<span class="linenos">60</span><span class="nv">$LocalFolderPath</span> <span class="p">=</span> <span class="s2">&quot;.\ReportsDownloaded&quot;</span>
+<span class="linenos">61</span>
+<span class="linenos">62</span><span class="c"># Get the last created subfolder in the Box folder</span>
+<span class="linenos">63</span><span class="nv">$lastCreatedSubfolder</span> <span class="p">=</span> <span class="nb">Get-LastCreatedSubfolder</span> <span class="n">-Token</span> <span class="nv">$BoxApiToken</span> <span class="n">-ParentFolderId</span> <span class="nv">$ParentFolderId</span>
+<span class="linenos">64</span>
+<span class="linenos">65</span><span class="k">if</span> <span class="p">(</span><span class="nv">$lastCreatedSubfolder</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">66</span>    <span class="nv">$subfolderName</span> <span class="p">=</span> <span class="nv">$lastCreatedSubfolder</span><span class="p">.</span><span class="n">name</span>
+<span class="linenos">67</span>    <span class="nv">$subfolderId</span> <span class="p">=</span> <span class="nv">$lastCreatedSubfolder</span><span class="p">.</span><span class="n">id</span>
+<span class="linenos">68</span>
+<span class="linenos">69</span>    <span class="c"># Get the last created file in the subfolder</span>
+<span class="linenos">70</span>    <span class="nv">$lastCreatedFile</span> <span class="p">=</span> <span class="nb">Get-LastCreatedFile</span> <span class="n">-Token</span> <span class="nv">$BoxApiToken</span> <span class="n">-FolderId</span> <span class="nv">$subfolderId</span>
+<span class="linenos">71</span>
+<span class="linenos">72</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$lastCreatedFile</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">73</span>        <span class="nv">$reportName</span> <span class="p">=</span> <span class="nv">$lastCreatedFile</span><span class="p">.</span><span class="n">name</span>
+<span class="linenos">74</span>        <span class="nv">$reportId</span> <span class="p">=</span> <span class="nv">$lastCreatedFile</span><span class="p">.</span><span class="n">id</span>
+<span class="linenos">75</span>
+<span class="linenos">76</span>        <span class="c"># Create the full download path for the report</span>
+<span class="linenos">77</span>        <span class="nv">$downloadPath</span> <span class="p">=</span> <span class="nb">Join-Path</span> <span class="n">-Path</span> <span class="nv">$LocalFolderPath</span> <span class="n">-ChildPath</span> <span class="nv">$reportName</span>
+<span class="linenos">78</span>
+<span class="linenos">79</span>        <span class="c"># Download the report from Box</span>
+<span class="linenos">80</span>        <span class="n">Download-BoxFile</span> <span class="n">-Token</span> <span class="nv">$BoxApiToken</span> <span class="n">-FileId</span> <span class="nv">$reportId</span> <span class="n">-DownloadPath</span> <span class="nv">$downloadPath</span>
+<span class="linenos">81</span>
+<span class="linenos">82</span>        <span class="nb">Write-Host</span> <span class="s2">&quot;Report &#39;$reportName&#39; downloaded successfully.&quot;</span>
+<span class="linenos">83</span>
+<span class="linenos">84</span>        <span class="c"># Move the downloaded report to a specific folder on your machine</span>
+<span class="linenos">85</span>        <span class="nv">$destinationFolder</span> <span class="p">=</span> <span class="s2">&quot;C:\Users\jeffrey.samuels\Box\O3 Tracking Uploads\01_Received (upload csv files here)&quot;</span>
+<span class="linenos">86</span>        <span class="nv">$destinationPath</span> <span class="p">=</span> <span class="nb">Join-Path</span> <span class="n">-Path</span> <span class="nv">$destinationFolder</span> <span class="n">-ChildPath</span> <span class="nv">$reportName</span>
+<span class="linenos">87</span>        <span class="nb">Move-Item</span> <span class="n">-Path</span> <span class="nv">$downloadPath</span> <span class="n">-Destination</span> <span class="nv">$destinationPath</span>
+<span class="linenos">88</span>
+<span class="linenos">89</span>        <span class="nb">Write-Host</span> <span class="s2">&quot;Report &#39;$reportName&#39; moved to &#39;$destinationPath&#39;.&quot;</span>
+<span class="linenos">90</span>    <span class="p">}</span>
+<span class="linenos">91</span>    <span class="k">else</span> <span class="p">{</span>
+<span class="linenos">92</span>        <span class="nb">Write-Host</span> <span class="s2">&quot;No files found in the subfolder.&quot;</span>
+<span class="linenos">93</span>    <span class="p">}</span>
+<span class="linenos">94</span><span class="p">}</span>
+<span class="linenos">95</span><span class="k">else</span> <span class="p">{</span>
+<span class="linenos">96</span>    <span class="nb">Write-Host</span> <span class="s2">&quot;No subfolders found in the Box parent folder.&quot;</span>
+<span class="linenos">97</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>The script requires an API token. To retrieve this token:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Go to Box.com</p></li>
+<li><p>In the bottom left of the blue sidebar, click “Dev Console”.</p></li>
+<li><p>Click on the relevant Box CLI App (you can check creation date for the latest).</p></li>
+<li><p>Click the “Configuration” tab.</p></li>
+<li><p>Click “Generate Developer Token”.</p></li>
+<li><p>Click “Copy”</p></li>
+<li><p>Paste API token in powershell script’s $BoxAPIToken variable.</p></li>
+</ol>
+</div></blockquote>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="moveo3notes.html" class="btn btn-neutral float-left" title="MoveO3Notes.ps1" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jeffrey Samuels, Hannah Brown.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
