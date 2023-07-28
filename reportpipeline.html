@@ -87,7 +87,7 @@ PowerBI for the dashboard.</p>
 <div class="highlight-Powershell notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c"># When using this file, make sure to change the $BoxApiToken, $ParentFolderID, $LocalFolderPath, and $destinationFolder</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="c"># Set Box API token and folder ID</span>
-<span class="linenos"> 4</span><span class="nv">$BoxApiToken</span> <span class="p">=</span> <span class="s2">&quot;OikiKdoUdQOqKPF0eF90UVF0053hbmg1&quot;</span>
+<span class="linenos"> 4</span><span class="nv">$BoxApiToken</span> <span class="p">=</span> <span class="s2">&quot;&lt;INSERT API TOKEN HERE&gt;&quot;</span>
 <span class="linenos"> 5</span><span class="nv">$ParentFolderId</span> <span class="p">=</span> <span class="s2">&quot;218661172585&quot;</span>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="c"># Function to get the last created subfolder in a Box folder</span>
@@ -183,9 +183,8 @@ PowerBI for the dashboard.</p>
 <span class="linenos">97</span><span class="p">}</span>
 </pre></div>
 </div>
-<p>The script requires an API token. To retrieve this token:</p>
-<blockquote>
-<div><ol class="arabic simple">
+<dl class="simple">
+<dt>The script requires an API token. To retrieve this token:</dt><dd><ol class="arabic simple">
 <li><p>Go to Box.com</p></li>
 <li><p>In the bottom left of the blue sidebar, click “Dev Console”.</p></li>
 <li><p>Click on the relevant Box CLI App (you can check creation date for the latest).</p></li>
@@ -194,7 +193,13 @@ PowerBI for the dashboard.</p>
 <li><p>Click “Copy”</p></li>
 <li><p>Paste API token in powershell script’s $BoxAPIToken variable.</p></li>
 </ol>
-</div></blockquote>
+</dd>
+</dl>
+<p>You will also want to set the $ParentFolderId variable to the location where Box reports are being stored after being generated.</p>
+<p>Because the filepath where the report is downloaded to uses “....&quot;, you will need to run this script in the directory where the
+script is stored.</p>
+<p>Make sure to set the $destinationFolder variable to the filepath on your machine to the shared Box folder. This script is designed
+to work when Box is available from the host machine’s file explorer.</p>
 </section>
 
 
