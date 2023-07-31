@@ -11,7 +11,7 @@ PowerBI for the dashboard.
 	# When using this file, make sure to change the $BoxApiToken, $ParentFolderID, $LocalFolderPath, and $destinationFolder
 
 	# Set Box API token and folder ID
-	$BoxApiToken = "OikiKdoUdQOqKPF0eF90UVF0053hbmg1"
+	$BoxApiToken = "<INSERT API TOKEN HERE>"
 	$ParentFolderId = "218661172585"
 
 	# Function to get the last created subfolder in a Box folder
@@ -108,7 +108,6 @@ PowerBI for the dashboard.
 
 
 The script requires an API token. To retrieve this token:
-
 	1. Go to Box.com
 	2. In the bottom left of the blue sidebar, click "Dev Console".
 	3. Click on the relevant Box CLI App (you can check creation date for the latest).
@@ -116,3 +115,11 @@ The script requires an API token. To retrieve this token:
 	5. Click "Generate Developer Token".
 	6. Click "Copy"
 	7. Paste API token in powershell script's $BoxAPIToken variable.
+
+You will also want to set the $ParentFolderId variable to the location where Box reports are being stored after being generated.
+
+Because the filepath where the report is downloaded to uses "..\..\", you will need to run this script in the directory where the 
+script is stored.
+
+Make sure to set the $destinationFolder variable to the filepath on your machine to the shared Box folder. This script is designed 
+to work when Box is available from the host machine's file explorer.

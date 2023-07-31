@@ -281,6 +281,8 @@ Below is the full Powershell script for provisioning users and their folders.
 	# Provision Box accounts for employee and their supervisor.
 	Function New-Provision-Managed-User {
 	    ForEach ($Employee in $Employees) {
+	        $managerEmail = $Employee.managerEmail
+	        $email = $Employee.email
 	        Write-Log "Creating employee Managed User account with first name: $($Employee.firstName), last name: $($Employee.lastName), email: $($Employee.email)" -output True
 	        # Create Managed User
 	        try {
@@ -291,19 +293,6 @@ Below is the full Powershell script for provisioning users and their folders.
 	        }
 	        catch {
 	            Write-Log "Failed to create Managed User for email: $($Employee.email). Skipping this user. See log for details." -errorMessage $CreatedManagedUserResp -output true -color Red
-	            # Calls Create-Folders function even if user provisioning failed.
-	            #Create-Folders
-	        }
-	        try {                   
-	            # Provision supervisor
-	            $CreatedSupervisorResp = (box users:create "$($Employee.manager)" $Employee.managerEmail --json 2>&1)
-	            $SupervisorID = $CreatedSupervisorResp | ConvertFrom-Json | ForEach-Object {$_.id }
-	            Write-Log "Created Supervisor $($Employee.manager) with ID: $SupervisorID for employee: $($Employee.username)" -output True
-	            # Calls Create-Folders function if user provisioning succeeded.
-	            Create-Folders
-	        }
-	        catch {
-	            Write-Log "Failed to create Supervisor $($Employee.manager) for employee: $($Employee.username). Skipping this user. See log for details." -errorMessage $CreatedSupervisorResp -output true -color Red
 	            # Calls Create-Folders function even if user provisioning failed.
 	            Create-Folders
 	        }
@@ -337,16 +326,16 @@ Below is the full Powershell script for provisioning users and their folders.
 
 	        # Collaborate New Managed User to Folder Structure owned by current user
 	        try {
-	            $CollaboratedResp = box folders:collaborations:add $script:PersonalFolderID --role=viewer --user-id=$ManagedUserID --json 2>&1
+	            $CollaboratedResp = box folders:collaborations:add $script:PersonalFolderID --role=viewer --login=$email --json 2>&1
 	            $CollaboratedResp | ConvertFrom-Json | Out-Null
-	            Write-Log "Collaborated Managed User $($Employee.firstName) $($Employee.lastName) to $($Employee.username) indicated folder for provisioning with ID: $script:PersonalFolderID." -output True
+	            Write-Log "Collaborated User $($Employee.firstName) $($Employee.lastName) to $($Employee.username)'s indicated folder for provisioning with ID: $script:PersonalFolderID." -output True
 	        }
 	        catch {
 	            Write-Log "Failed to create collaboration for user $($Employee.firstName) $($Employee.lastName) with ID: $ManagedUserID, to folder ID: $script:PersonalFolderID. See log for details." -errorMessage $CollaboratedResp -output true -color Red
 	        }
 	        try {
 	            # Added new lines below to give supervisor access
-	            $SupervisorResp = box folders:collaborations:add $script:PersonalFolderID --role=editor --login=$Employee.managerEmail --json 2>&1
+	            $SupervisorResp = box folders:collaborations:add $script:PersonalFolderID --role=editor --login=$managerEmail --json 2>&1
 	            $SupervisorResp | ConvertFrom-Json | Out-Null
 	            Write-Log "Supervisor User $($Employee.manager) to $($Employee.usernmae) indicated folder for provisioning with ID $script:PersonalFolderID" -output True
 	        }
@@ -399,12 +388,6 @@ Below is the full Powershell script for provisioning users and their folders.
 	            $CreatedChildFolderResp = box folders:create "$($ParentFolderId)" "$($child.name)" --fields="id,name" --json 2>&1
 	            $CreatedChildFolder = $CreatedChildFolderResp | ConvertFrom-Json
 	            Write-Log "Created subfolder '$($child.name)' with id: $($CreatedChildFolder.id) under '$ParentFolderName' (ID: $ParentFolderId) folder." -output True
-
-	            # Provision supervisor
-	            $CreatedSupervisorResp = (box users:create "$($Employee.manager)" $Employee.managerEmail --json 2>&1)
-	            $SupervisorID = $CreatedSupervisorResp | ConvertFrom-Json | ForEach-Object {$_.id }
-	            Write-Log "Created Supervisor $($Employee.supervisor) with ID: $SupervisorID for employee: $($Employee.username)" -output True
-	            
 	            if ($child.name -eq 'Active') {
 	                $activeFolderId = $CreatedChildFolder.id
 	            }
@@ -452,4 +435,6 @@ Below is the full Powershell script for provisioning users and their folders.
 	Start-Users-Provisoning-Creation-Script
 
 
-As stated above, this script should output three different CSV files. MasterMap.csv, ArchiveFolderIDs.csv, and ActiveFolderIDs.csv.
+As stated above, this script should output three different CSV files. MasterMap.csv, ArchiveFolderIDs.csv, and ActiveFolderIDs.csv. It should be noted this version of the script foregos using "Managed users", or users internal to Box and instead treats everyone as external. This means that they will be invited via email and see their O3 Notes folders as gray in their personal Box. External users can still be managed in the sense that administrators can control which folders are shared with them and their access levels to each of those folders, although they will be considered as external to the organization.
+
+Other versions of UserProv.ps1 are available that create managed users instead of inviting external collaborators. This script with external collaborations was created as trying to create managed users would fail during testing, as Box would identify a managed user account associated with that email. This means, that when provisioning new folders for people originally, you will want to run a Box report to get the User ID of each employee, so that they can be added to their personal folder. This can be performed via a script or done manually.
