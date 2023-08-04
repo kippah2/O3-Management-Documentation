@@ -1,3 +1,4 @@
+.. /changemanagement
 .. /reportpipeline
 Get-AD-Users.ps1
 ================
@@ -53,3 +54,32 @@ The Get-AD-Users.ps1 script is used to retrieve user information from Active Dir
 	Write-Host "User export complete. CSV file created at: $csvPath"
 
 The output file will contain columns for ``"firstName","lastName","email","username","managerEmail","manager"``. The username column is the firstName appended to the lastName, which is the username Box will give to these users. The manager and managerEmail columns are used for provisioning the user account for that employee's supervisor. This is important becaused in the Userprov.ps1 script, the supervisor will be added as a collaborator to each employee's folder.
+
+Output/get-users.csv
+--------------------
+
+.. code-block::
+	:linenos:
+
+	"firstName","lastName","email","username","managerEmail","manager"
+	"Gareth","Oxendine","Gareth.Oxendine@Truebeck.com","GarethOxendine","Richard.Sealund@Truebeck.com","Richard Sealund"
+	"Mike","Elmore","Mike.Elmore@Truebeck.com","MikeElmore","Matthew.McLean@Truebeck.com","Matthew McLean"
+	"Jared","Putnam","Jared.Putnam@Truebeck.com","JaredPutnam","Richard.Sealund@Truebeck.com","Richard Sealund"
+	"Al","Gomez","Albert.Gomez@truebeck.com","AlGomez","Richard.Sealund@Truebeck.com","Richard Sealund"
+	"Crissi","Lanier","Crissi.Lanier@truebeck.com","CrissiLanier","Sean.Truesdale@truebeck.com","Sean Truesdale"
+	"Zsofia","Gutvill","Zsofia.Gutvill@Truebeck.com","ZsofiaGutvill","Justin.Pebet@Truebeck.com","Justin Pebet"
+	"Dennis","Richardson","Dennis.Richardson@Truebeck.com","DennisRichardson","Kathy.Reiner@truebeck.com","Kathy Reiner"
+	"Jackie","Jensen","Jackie.Jensen@truebeck.com","JackieJensen","Rosanne.SmithKaya@truebeck.com","Rosanne Smith Kaya"
+	"Shelley","Schmaltz","Shelley.Schmaltz@truebeck.com","ShelleySchmaltz","Dennis.Richardson@Truebeck.com","Dennis Richardson"
+	"Amanda","Carson","Amanda.Carson@truebeck.com","AmandaCarson","Rosanne.SmithKaya@truebeck.com","Rosanne Smith Kaya"
+	"Nicole","Cannon","Nicole.Cannon@Truebeck.com","NicoleCannon","Rosanne.SmithKaya@truebeck.com","Rosanne Smith Kaya"
+	"Rosanne","Smith Kaya","Rosanne.SmithKaya@truebeck.com","RosanneSmithKaya","Kathy.Reiner@truebeck.com","Kathy Reiner"
+	"Alex","Snyder","Alex.Snyder@truebeck.com","AlexSnyder","Justin.Porter@truebeck.com","Justin Porter"
+	"Michael","Vachon","Michael.Vachon@Truebeck.com","MichaelVachon","Justin.Porter@truebeck.com","Justin Porter"
+	"Rosemary","Newkirk","Rosemary.Newkirk@Truebeck.com","RosemaryNewkirk","Kathy.Reiner@truebeck.com","Kathy Reiner"
+	"Andrea","Hernando","Andrea.Hernando@Truebeck.com","AndreaHernando","Justin.Porter@truebeck.com","Justin Porter"
+	"Bryce","Haboian","Bryce.Haboian@Truebeck.com","BryceHaboian","Justin.Porter@truebeck.com","Justin Porter"
+	"Dana","Agles","Dana.Agles@truebeck.com","DanaAgles","Dennis.Richardson@Truebeck.com","Dennis Richardson"
+	"Margarita","Luna","Margarita.Luna@Truebeck.com","MargaritaLuna","Dennis.Richardson@Truebeck.com","Dennis Richardson"
+	"Amy","Martin","Amy.Martin@Truebeck.com","AmyMartin","Rosanne.SmithKaya@truebeck.com","Rosanne Smith Kaya"
+

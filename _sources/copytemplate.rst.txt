@@ -1,5 +1,7 @@
 .. /moveo3notes
 .. /getadusers
+.. /changemanagement
+.. /reportpipeline
 CopyTemplate.ps1
 ================
 

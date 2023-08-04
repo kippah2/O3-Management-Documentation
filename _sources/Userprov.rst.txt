@@ -3,6 +3,7 @@
 .. /copytemplate
 .. /moveo3notes
 .. /getadusers
+.. /changemanagement
 .. /reportpipeline
 Userprov.ps1
 ============
@@ -101,9 +102,12 @@ Below is the full Powershell script for provisioning users and their folders.
 	    # This is a custom CSV file that will keep track of user, userfolderID, archivefolderID, activefolderID
 	    # Will be used for mapping which folders files should be moved to in the MoveO3Notes.ps1 script
 	    [string]$MasterMapFile = "..\MoveO3Notes\Input\MasterMap.csv",
+
+	    # This is the output CSV that keeps tracks of collaborations and is necessary for the changemanagement.ps1 script so that it may remove old supervisors from folders
+	    [string]$CollaborationInfoCSV = "..\ChangeManagement\newInput\CollaborationInfo.csv",
 	    
 	    # Path to CSV where users to be added are stored.
-	    [string]$EmployeeList = "..\Get-AD-Users\Output\get-users.csv",
+	    [string]$EmployeeList = ".\Input\get-users.csv",
 
 	    # Personal Folder Structure: Set either path build off JSON or directly upload a local folder
 	    [string]$FolderStructureJSONPath = ".\Input\Folder_Structure.json",
@@ -169,7 +173,7 @@ Below is the full Powershell script for provisioning users and their folders.
 	    if ($errorMessage) {
 	        $logMessage += ($errorMessage + "`t")
 	    }
-
+	    
 	    if ($responseBody) {
 	        $logMessage += ("Box responded with: " + $responseBody + "`t")
 	    }
@@ -324,26 +328,48 @@ Below is the full Powershell script for provisioning users and their folders.
 	            
 	        }
 
-	        # Collaborate New Managed User to Folder Structure owned by current user
-	        try {
-	            $CollaboratedResp = box folders:collaborations:add $script:PersonalFolderID --role=viewer --login=$email --json 2>&1
-	            $CollaboratedResp | ConvertFrom-Json | Out-Null
-	            Write-Log "Collaborated User $($Employee.firstName) $($Employee.lastName) to $($Employee.username)'s indicated folder for provisioning with ID: $script:PersonalFolderID." -output True
-	        }
-	        catch {
-	            Write-Log "Failed to create collaboration for user $($Employee.firstName) $($Employee.lastName) with ID: $ManagedUserID, to folder ID: $script:PersonalFolderID. See log for details." -errorMessage $CollaboratedResp -output true -color Red
-	        }
-	        try {
-	            # Added new lines below to give supervisor access
-	            $SupervisorResp = box folders:collaborations:add $script:PersonalFolderID --role=editor --login=$managerEmail --json 2>&1
-	            $SupervisorResp | ConvertFrom-Json | Out-Null
-	            Write-Log "Supervisor User $($Employee.manager) to $($Employee.usernmae) indicated folder for provisioning with ID $script:PersonalFolderID" -output True
-	        }
-	        catch {
-	            Write-Log "Failed to create collaboration for Supervisor $($Employee.manager) to folder ID: $script:PersonalFolderID. See log for details." -errorMessage $CollaboratedResp -output true -color Red
-	            continue
-	        }
+	            # Collaborate New Managed User to Folder Structure owned by current user
+	    try {
+	        $CollaboratedResp = box folders:collaborations:add $script:PersonalFolderID --role=viewer --login=$email --json 2>&1
+	        $CollaboratedRespObj = $CollaboratedResp | ConvertFrom-Json
+	        $CollaborationID = $CollaboratedRespObj.id
+
+	        [PSCustomObject]@{
+	            folderOwner = $Employee.email
+	            folderName = $script:PersonalFolderName
+	            added = $Employee.firstName + " " + $Employee.lastName
+	            email = $Employee.email
+	            collaborationID = $CollaborationID
+	            folderID = $script:PersonalFolderID
+	        } | Export-Csv -Path $CollaborationInfoCSV -NoTypeInformation -Append
+
+	        Write-Log "Collaborated Managed User $($Employee.firstName) $($Employee.lastName) to $($Employee.username) indicated folder for provisioning with ID: $script:PersonalFolderID and collaboration ID: $CollaborationID." -output True
 	    }
+	    catch {
+	        Write-Log "Failed to create collaboration for user $($Employee.firstName) $($Employee.lastName) with ID: $ManagedUserID, to folder ID: $script:PersonalFolderID. See log for details." -errorMessage $CollaboratedResp -output true -color Red
+	    }
+
+	    try {
+	        $SupervisorResp = box folders:collaborations:add $script:PersonalFolderID --role=editor --login=$managerEmail --json 2>&1
+	        $SupervisorRespObj = $SupervisorResp | ConvertFrom-Json
+	        $SupervisorCollaborationID = $SupervisorRespObj.id
+
+	        [PSCustomObject]@{
+	            folderOwner = $Employee.email
+	            folderName = $script:PersonalFolderName
+	            added = $Employee.manager
+	            email = $Employee.managerEmail
+	            collaborationID = $SupervisorCollaborationID
+	            folderID = $script:PersonalFolderID
+	        } | Export-Csv -Path $CollaborationInfoCSV -NoTypeInformation -Append
+
+	        Write-Log "Supervisor User $($Employee.manager) collaborated to $($Employee.username) indicated folder for provisioning with ID $script:PersonalFolderID and collaboration ID: $SupervisorCollaborationID" -output True
+	    }
+	    catch {
+	        Write-Log "Failed to create collaboration for Supervisor $($Employee.manager) to folder ID: $script:PersonalFolderID. See log for details." -errorMessage $SupervisorResp -output true -color Red
+	        continue
+	    }
+	}
 
 	    # Create folder sturcture form JSON file
 	Function New-Folder-Structure {
@@ -433,6 +459,8 @@ Below is the full Powershell script for provisioning users and their folders.
 	}
 
 	Start-Users-Provisoning-Creation-Script
+
+
 
 
 As stated above, this script should output three different CSV files. MasterMap.csv, ArchiveFolderIDs.csv, and ActiveFolderIDs.csv. It should be noted this version of the script foregos using "Managed users", or users internal to Box and instead treats everyone as external. This means that they will be invited via email and see their O3 Notes folders as gray in their personal Box. External users can still be managed in the sense that administrators can control which folders are shared with them and their access levels to each of those folders, although they will be considered as external to the organization.

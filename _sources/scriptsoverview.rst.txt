@@ -3,17 +3,19 @@
 .. /copytemplate
 .. /moveo3notes
 .. /getadusers
+.. /changemanagement
 .. /reportpipeline
 Scripts Overview
 ================
 
-There are 6 scripts that are responsible for maintaining this system. 
+There are 7 scripts that are responsible for maintaining this system. 
 	1. `Get-AD-Users.ps1 <getadusers.html>`_
-	2. `UserProv.ps1 <Userprov.html>`_
-	3. `MonthlyArchiveCreate.ps1 <monthlyarchivecreate.html>`_
-	4. `CopyTemplate.ps1 <copytemplate.html>`_
-	5. `MoveO3Notes.ps1 <moveo3notes.html>`_
-	6. `ReportPipeline.ps1 <reportpipeline.html>`_
+	2. `ChangeManagement.ps1 <changemanagement.html>`_
+	3. `UserProv.ps1 <Userprov.html>`_
+	4. `MonthlyArchiveCreate.ps1 <monthlyarchivecreate.html>`_
+	5. `CopyTemplate.ps1 <copytemplate.html>`_
+	6. `MoveO3Notes.ps1 <moveo3notes.html>`_
+	7. `ReportPipeline.ps1 <reportpipeline.html>`_
 
 Scheduling
 ----------
@@ -22,8 +24,10 @@ There is a specific order these scripts should be run. This can be set with Wind
 
 	* Get-AD-Users.ps1
 		* Whenever new people are added to the organization, run this script before running Userprov.ps1.
+	* ChangeManagement.ps1
+		* Every Monday at 12am
 	* Userprov.ps1
-		* Whenever new people are added to the organization.
+		* Every Monday at 3pm.
 	* MonthlyArchiveCreate.ps1
 		* On the first of each month.
 	* CopyTemplate.ps1

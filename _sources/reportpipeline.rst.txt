@@ -1,3 +1,5 @@
+.. /getadusers
+.. /changemanagement
 ReportPipeline.ps1
 ==================
 

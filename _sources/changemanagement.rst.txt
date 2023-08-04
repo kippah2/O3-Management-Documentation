@@ -1,0 +1,222 @@
+.. /getadusers
+.. /changemanagement
+ChangeManagerment.ps1
+=====================
+
+The change management script is responsible for comparing the most recent active directory-pulled user list with the user list that was last used for the user prov script.
+
+After User-Prov runs, place its input get-users.csv into the "old input" folder of the change management script. The get-ad-users script should be run before this script, ideally on the day of. Place the output of the most recent get-users.csv into the "new input" folder of the change management script.
+
+The change management script also takes another input from the running of the user prov script. This file is called CollaborationInfo.csv. It looks like:
+
+Input/CollaborationInfo.csv
+---------------------------
+.. code-block::
+	:linenos:
+
+	"folderOwner","folderName","added","email","collaborationID","folderID"
+	"Gareth.Oxendine@Truebeck.com","GarethOxendine's O3 Notes","Gareth Oxendine","Gareth.Oxendine@Truebeck.com","47212710533","220261981493"
+	"Jared.Putnam@Truebeck.com","JaredPutnam's O3 Notes","Jared Putnam","Jared.Putnam@Truebeck.com","47214311230","220260455641"
+	"Albert.Gomez@truebeck.com","AlGomez's O3 Notes","Al Gomez","Albert.Gomez@truebeck.com","47212862183","220248671027"
+	"Crissi.Lanier@truebeck.com","CrissiLanier's O3 Notes","Crissi Lanier","Crissi.Lanier@truebeck.com","47214141539","220262034293"
+	"Crissi.Lanier@truebeck.com","CrissiLanier's O3 Notes","Sean Truesdale","Sean.Truesdale@truebeck.com","47212334176","220262034293"
+	"Zsofia.Gutvill@Truebeck.com","ZsofiaGutvill's O3 Notes","Zsofia Gutvill","Zsofia.Gutvill@Truebeck.com","47214039958","220260647029"
+	"owners.email@truebeck.com","owner's O3 Notes","owner-or.manager@truebeck.com","collabid","folderid"
+
+The script will also output another file called discrepancies.csv which is the product of comparing the new and old user lists. It looks like:
+
+Output/discrepancies.csv
+------------------------
+.. code-block::
+	:linenos:
+
+	"Action","name","username","email","oldManager","oldManagerEmail","newManager","newManagerEmail"
+	"User Removed","Andrew Willard","AndrewWillard","Andrew.Willard@Truebeck.com","","",,
+	"User Removed","Jeffrey Samuels","JeffreySamuels","Jeffrey.Samuels@Truebeck.com","Richard Sealund","Richard.Sealund@Truebeck.com",,
+	"User Removed","Paige Camacho","PaigeCamacho","Paige.Camacho@Truebeck.com","","",,
+	"User Removed","Dana Agles","DanaAgles","Dana.Agles@truebeck.com","Dennis Richardson","Dennis.Richardson@Truebeck.com",,
+	"User Removed","Eileen Welch","EileenWelch","Eileen.Welch@Truebeck.com","","",,
+	"Manager Changed","Gareth Oxendine","GarethOxendine","Gareth.Oxendine@Truebeck.com","Richard Sealund","Richard.Sealund@Truebeck.com","bobbi smith","bobbi.smith@truebeck.com"
+	"User Removed","Bless Lagus","BlessLagus","Bless.Lagus@Truebeck.com","Richard Sealund","Richard.Sealund@Truebeck.com",,
+	"User Removed","Deirdre Bonitz","DeirdreBonitz","Deirdre.Bonitz@Truebeck.com","","",,
+	"User Removed","Kirbby Rodriguez","KirbbyRodriguez","Kirbby.Rodriguez@Truebeck.com","","",,
+	"User Removed","box sync","boxsync","box.sync@truebeck.com","","",,
+	"User Removed","Madison Truesdale","MadisonTruesdale","Madison.Truesdale@Truebeck.com","","",,
+	"User Removed","Stephen Kashani","StephenKashani","Stephen.Kashani@Truebeck.com","","",,
+	"User Removed","Kyle Merker","KyleMerker","Kyle.Merker@Truebeck.com","","",,
+	"User Removed","Christian Munoz","ChristianMunoz","Christian.Munoz@truebeck.com","","",,
+	"Manager Changed","Jared Putnam","JaredPutnam","Jared.Putnam@Truebeck.com","Richard Sealund","Richard.Sealund@Truebeck.com","Bobby Test","Bobby.Test@Truebeck.com"
+
+It then creates an object array based on the discrepancies which contains objects for every instance where the action was "Changed Manager". Then, the script makes another object array called $collabinfo, which contains every entry from CollaborationInfo.csv where "folderOwner" does not equal "addedEmail". 
+
+.. code-block:: Powershell
+	:linenos:
+
+	$discrep = $discrepancies | Where-Object {$_.Action -contains "Manager Changed"}
+	$collabinfo = $collaborations | Where-Object {$_.folderOwner -ne $_.email}
+
+Once the full array is made, the script iterates through each object, comparing to every object in $collabinfo (nested foreach-object loop). When comparing to the CollaborationInfo.csv file, it will be looking for matches between the $collabinfo.folderOwner value and $discrepancies.email.
+
+.. code-block:: Powershell
+	:linenos:
+
+	foreach ($discrepobject in $discrep) {
+        foreach ($collabobject in $collabinfo) {
+
+If a match is found, it will then looks at $collabinfo.managerEmail and compares against $discrep.oldManagerEmail and $discrep.newManagerEmail.
+
+.. code-block:: Powershell
+	:linenos:
+
+	if ($collabobject.folderOwner -eq $discrepobject.email) {
+        Write-Host "Match found for $($collabobject.folderOwner) and $($discrepobject.email)"
+        if ($collabobject.email -ne $discrepobject.newManagerEmail) {
+            $newManagerResp = (box folders:collaborations:add $collabobject.folderID --role editor --login $($discrepobject.newManagerEmail) --json 2>&1)
+        }
+    }
+    if ($collabobject.email -eq $discrepobject.oldManagerEmail) {
+        $deleteManagerResp = (box collaborations:delete $collabobject.collaborationID)
+    }
+
+If a new collaboration is being added, all of the relevant information will be appended to the CollaborationInfo.csv file. If a collaboration is being deleted, the corresponding line in the CollaborationInfol.csv file will be deleted.
+
+Here is the script in it's entirety:
+
+changemanagement.ps1
+--------------------
+.. code-block:: Powershell
+	:linenos:
+
+	# Define the paths to the input CSV files
+	$latestFile = ".\newInput\get-users-test.csv"
+	$secondLatestFile = ".\oldInput\get-users.csv"
+
+	# Define the path to the collaboration CSV file
+	$collaborationFile = ".\newInput\CollaborationInfo.csv"
+
+	# Load the newest and second newest CSV files into variables and convert them to hash tables
+	$oldUsers = @{}
+	$newUsers = @{}
+
+	# Function to create a custom object for a user
+	function CreateUserObject($user) {
+	    $name = $user.firstName + " " + $user.lastName
+	    [PSCustomObject]@{
+	        name = $name
+	        username = $user.username
+	        email = $user.email
+	        manager = $user.manager
+	        managerEmail = $user.managerEmail
+	    }
+	}
+
+	Import-Csv $secondLatestFile | ForEach-Object { $oldUsers[$_.username] = CreateUserObject $_ }
+	Import-Csv $latestFile | ForEach-Object { $newUsers[$_.username] = CreateUserObject $_ }
+
+	# Load the collaboration data from the CSV file
+	$collaborations = Import-Csv $collaborationFile
+
+	# Create an array to store discrepancies
+	$discrepancies = @()
+
+	# Compare old and new users
+	foreach ($oldUser in $oldUsers.GetEnumerator()) {
+	    $username = $oldUser.Key
+	    $oldUserInfo = $oldUser.Value
+	    $newUserInfo = $newUsers[$username]
+
+	    if (!$newUserInfo) {
+	        # User from the old file is not present in the new file
+	        $discrepancies += [PSCustomObject]@{
+	            Action = "User Removed"
+	            name = $oldUserInfo.name
+	            username = $oldUserInfo.username
+	            email = $oldUserInfo.email
+	            oldManager = $oldUserInfo.manager
+	            oldManagerEmail = $oldUserInfo.managerEmail
+	            newManager = $null  # Set to $null when user is removed
+	            newManagerEmail = $null  # Set to $null when user is removed
+	        }
+	    } else {
+	        # User exists in both files, check for manager and managerEmail changes
+	        if ($oldUserInfo.manager -ne $newUserInfo.manager -or $oldUserInfo.managerEmail -ne $newUserInfo.managerEmail) {
+	            $discrepancies += [PSCustomObject]@{
+	                Action = "Manager Changed"
+	                name = $oldUserInfo.name
+	                username = $oldUserInfo.username
+	                email = $oldUserInfo.email
+	                oldManager = $oldUserInfo.manager
+	                oldManagerEmail = $oldUserInfo.managerEmail
+	                newManager = $newUserInfo.manager
+	                newManagerEmail = $newUserInfo.managerEmail
+	            }
+
+	            
+	        } else {
+	            # If the user's manager or managerEmail did not change, add the old values as well
+	            $discrepancies += [PSCustomObject]@{
+	                Action = "No Change"
+	                name = $oldUserInfo.name
+	                username = $oldUserInfo.username
+	                email = $oldUserInfo.email
+	                oldManager = $oldUserInfo.manager
+	                oldManagerEmail = $oldUserInfo.managerEmail
+	                newManager = $null  # Set to $null when there is no change
+	                newManagerEmail = $null  # Set to $null when there is no change
+	            }
+	        }
+	    }
+	}
+
+	# Display the discrepancies
+	$discrepancies | Format-Table -Property Action, name, email, oldManager, oldManagerEmail, newManager, newManagerEmail -AutoSize
+
+	# Export the discrepancies to a CSV file
+	$discrepancies | Export-Csv -Path ".\Output\discrepancies.csv" -NoTypeInformation
+
+	$discrep = $discrepancies | Where-Object {$_.Action -contains "Manager Changed"}
+	$collabinfo = $collaborations | Where-Object {$_.folderOwner -ne $_.email}
+
+	makeChanges $discrep $collabinfo
+
+	# Function for adding new managers to folders and removing old managers from folders.
+	function makeChanges ($discrep, $collabinfo){
+	    # Iterate through $discrep, which is object array of instances where the manager changed.
+	    foreach ($discrepobject in $discrep) {
+	        # Iterate through $collabobject, which is an object array of collaborations where the owner of the folder is not the same person who the collaboration is for.
+	        foreach ($collabobject in $collabinfo) {
+	            echo "collab: $($collabobject.email) discrep: $($discrepobject.email)"
+	            if ($collabobject.folderOwner -eq $discrepobject.email) {
+	                Write-Host "Match found for $($collabobject.folderOwner) and $($discrepobject.email)"
+	                if ($collabobject.email -ne $discrepobject.newManagerEmail) {
+	                    $newManagerResp = (box folders:collaborations:add $collabobject.folderID --role editor --login $($discrepobject.newManagerEmail) --json 2>&1)
+	                    $newManagerRespObj = $newManagerResp | ConvertFrom-JSON
+	                    $CollaborationID = $newManagerRespObj.id
+	                    $folderName = $newManagerRespObj.item.name
+	                    $newcollaborations += [PSCustomObject]@{
+	                        folderowner = $collabobject.folderOwner
+	                        folderName = $collabobject.folderName
+	                        added = $discrepobject.newManager
+	                        email = $discrepobject.newManagerEmail
+	                        collaborationID = $CollaborationID
+	                        folderID = $collabobject.folderID
+	                    } | Export-Csv -Path $collaborationFile -NoTypeInformation -Append
+	                    Write-Host "Added collaborator $($discrepobject.newManager) to $folderName."
+	                }
+	                if ($collabobject.email -eq $discrepobject.oldManagerEmail) {
+	                    $deleteManagerResp = (box collaborations:delete $collabobject.collaborationID)
+	                    Write-Host "Removing collaboration with ID $collaborationID"
+	                    # Remove the collaboration from the $collaborations array
+	                    $global:collaborations = $global:collaborations | Where-Object { $_.collaborationID -ne $collabobject.collaborationID }
+	                    # Export the updated $collaborations array back to the CSV file
+	                    $global:collaborations | Export-Csv $collaborationFile -NoTypeInformation
+	                }
+	            else {
+	                Write-Host "Folder owner $($collabobject.folderOwner) is not user from discrepancy $($discrepobject.email). Moving on."
+	            }
+	        }
+	    }
+	    }
+	}
+
+

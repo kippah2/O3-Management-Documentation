@@ -1,4 +1,5 @@
 .. /getadusers
+.. /changemanagement
 .. /reportpipeline
 MoveO3Notes.ps1
 ===============

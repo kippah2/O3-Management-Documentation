@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChangeManagerment.ps1 &mdash; O3 Notes Management with Box API  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Userprov.ps1" href="Userprov.html" />
+    <link rel="prev" title="Get-AD-Users.ps1" href="getadusers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            O3 Notes Management with Box API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filestructure.html">File Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scriptsoverview.html">Scripts Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getadusers.html">Get-AD-Users.ps1</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ChangeManagerment.ps1</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#input-collaborationinfo-csv">Input/CollaborationInfo.csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output-discrepancies-csv">Output/discrepancies.csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#changemanagement-ps1">changemanagement.ps1</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Userprov.html">Userprov.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monthlyarchivecreate.html">MonthlyArchiveCreate.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copytemplate.html">CopyTemplate.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="moveo3notes.html">MoveO3Notes.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reportpipeline.html">ReportPipeline.ps1</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">O3 Notes Management with Box API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ChangeManagerment.ps1</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/changemanagement.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="changemanagerment-ps1">
+<h1>ChangeManagerment.ps1<a class="headerlink" href="#changemanagerment-ps1" title="Permalink to this heading"></a></h1>
+<p>The change management script is responsible for comparing the most recent active directory-pulled user list with the user list that was last used for the user prov script.</p>
+<p>After User-Prov runs, place its input get-users.csv into the “old input” folder of the change management script. The get-ad-users script should be run before this script, ideally on the day of. Place the output of the most recent get-users.csv into the “new input” folder of the change management script.</p>
+<p>The change management script also takes another input from the running of the user prov script. This file is called CollaborationInfo.csv. It looks like:</p>
+<section id="input-collaborationinfo-csv">
+<h2>Input/CollaborationInfo.csv<a class="headerlink" href="#input-collaborationinfo-csv" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="s2">&quot;folderOwner&quot;</span><span class="p">,</span><span class="s2">&quot;folderName&quot;</span><span class="p">,</span><span class="s2">&quot;added&quot;</span><span class="p">,</span><span class="s2">&quot;email&quot;</span><span class="p">,</span><span class="s2">&quot;collaborationID&quot;</span><span class="p">,</span><span class="s2">&quot;folderID&quot;</span>
+<span class="linenos">2</span><span class="s2">&quot;Gareth.Oxendine@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;GarethOxendine&#39;s O3 Notes&quot;</span><span class="p">,</span><span class="s2">&quot;Gareth Oxendine&quot;</span><span class="p">,</span><span class="s2">&quot;Gareth.Oxendine@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;47212710533&quot;</span><span class="p">,</span><span class="s2">&quot;220261981493&quot;</span>
+<span class="linenos">3</span><span class="s2">&quot;Jared.Putnam@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;JaredPutnam&#39;s O3 Notes&quot;</span><span class="p">,</span><span class="s2">&quot;Jared Putnam&quot;</span><span class="p">,</span><span class="s2">&quot;Jared.Putnam@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;47214311230&quot;</span><span class="p">,</span><span class="s2">&quot;220260455641&quot;</span>
+<span class="linenos">4</span><span class="s2">&quot;Albert.Gomez@truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;AlGomez&#39;s O3 Notes&quot;</span><span class="p">,</span><span class="s2">&quot;Al Gomez&quot;</span><span class="p">,</span><span class="s2">&quot;Albert.Gomez@truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;47212862183&quot;</span><span class="p">,</span><span class="s2">&quot;220248671027&quot;</span>
+<span class="linenos">5</span><span class="s2">&quot;Crissi.Lanier@truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;CrissiLanier&#39;s O3 Notes&quot;</span><span class="p">,</span><span class="s2">&quot;Crissi Lanier&quot;</span><span class="p">,</span><span class="s2">&quot;Crissi.Lanier@truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;47214141539&quot;</span><span class="p">,</span><span class="s2">&quot;220262034293&quot;</span>
+<span class="linenos">6</span><span class="s2">&quot;Crissi.Lanier@truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;CrissiLanier&#39;s O3 Notes&quot;</span><span class="p">,</span><span class="s2">&quot;Sean Truesdale&quot;</span><span class="p">,</span><span class="s2">&quot;Sean.Truesdale@truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;47212334176&quot;</span><span class="p">,</span><span class="s2">&quot;220262034293&quot;</span>
+<span class="linenos">7</span><span class="s2">&quot;Zsofia.Gutvill@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;ZsofiaGutvill&#39;s O3 Notes&quot;</span><span class="p">,</span><span class="s2">&quot;Zsofia Gutvill&quot;</span><span class="p">,</span><span class="s2">&quot;Zsofia.Gutvill@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;47214039958&quot;</span><span class="p">,</span><span class="s2">&quot;220260647029&quot;</span>
+<span class="linenos">8</span><span class="s2">&quot;owners.email@truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;owner&#39;s O3 Notes&quot;</span><span class="p">,</span><span class="s2">&quot;owner-or.manager@truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;collabid&quot;</span><span class="p">,</span><span class="s2">&quot;folderid&quot;</span>
+</pre></div>
+</div>
+<p>The script will also output another file called discrepancies.csv which is the product of comparing the new and old user lists. It looks like:</p>
+</section>
+<section id="output-discrepancies-csv">
+<h2>Output/discrepancies.csv<a class="headerlink" href="#output-discrepancies-csv" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="s2">&quot;Action&quot;</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="p">,</span><span class="s2">&quot;username&quot;</span><span class="p">,</span><span class="s2">&quot;email&quot;</span><span class="p">,</span><span class="s2">&quot;oldManager&quot;</span><span class="p">,</span><span class="s2">&quot;oldManagerEmail&quot;</span><span class="p">,</span><span class="s2">&quot;newManager&quot;</span><span class="p">,</span><span class="s2">&quot;newManagerEmail&quot;</span>
+<span class="linenos"> 2</span><span class="s2">&quot;User Removed&quot;</span><span class="p">,</span><span class="s2">&quot;Andrew Willard&quot;</span><span class="p">,</span><span class="s2">&quot;AndrewWillard&quot;</span><span class="p">,</span><span class="s2">&quot;Andrew.Willard@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,,</span>
+<span class="linenos"> 3</span><span class="s2">&quot;User Removed&quot;</span><span class="p">,</span><span class="s2">&quot;Jeffrey Samuels&quot;</span><span class="p">,</span><span class="s2">&quot;JeffreySamuels&quot;</span><span class="p">,</span><span class="s2">&quot;Jeffrey.Samuels@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;Richard Sealund&quot;</span><span class="p">,</span><span class="s2">&quot;Richard.Sealund@Truebeck.com&quot;</span><span class="p">,,</span>
+<span class="linenos"> 4</span><span class="s2">&quot;User Removed&quot;</span><span class="p">,</span><span class="s2">&quot;Paige Camacho&quot;</span><span class="p">,</span><span class="s2">&quot;PaigeCamacho&quot;</span><span class="p">,</span><span class="s2">&quot;Paige.Camacho@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,,</span>
+<span class="linenos"> 5</span><span class="s2">&quot;User Removed&quot;</span><span class="p">,</span><span class="s2">&quot;Dana Agles&quot;</span><span class="p">,</span><span class="s2">&quot;DanaAgles&quot;</span><span class="p">,</span><span class="s2">&quot;Dana.Agles@truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;Dennis Richardson&quot;</span><span class="p">,</span><span class="s2">&quot;Dennis.Richardson@Truebeck.com&quot;</span><span class="p">,,</span>
+<span class="linenos"> 6</span><span class="s2">&quot;User Removed&quot;</span><span class="p">,</span><span class="s2">&quot;Eileen Welch&quot;</span><span class="p">,</span><span class="s2">&quot;EileenWelch&quot;</span><span class="p">,</span><span class="s2">&quot;Eileen.Welch@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,,</span>
+<span class="linenos"> 7</span><span class="s2">&quot;Manager Changed&quot;</span><span class="p">,</span><span class="s2">&quot;Gareth Oxendine&quot;</span><span class="p">,</span><span class="s2">&quot;GarethOxendine&quot;</span><span class="p">,</span><span class="s2">&quot;Gareth.Oxendine@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;Richard Sealund&quot;</span><span class="p">,</span><span class="s2">&quot;Richard.Sealund@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;bobbi smith&quot;</span><span class="p">,</span><span class="s2">&quot;bobbi.smith@truebeck.com&quot;</span>
+<span class="linenos"> 8</span><span class="s2">&quot;User Removed&quot;</span><span class="p">,</span><span class="s2">&quot;Bless Lagus&quot;</span><span class="p">,</span><span class="s2">&quot;BlessLagus&quot;</span><span class="p">,</span><span class="s2">&quot;Bless.Lagus@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;Richard Sealund&quot;</span><span class="p">,</span><span class="s2">&quot;Richard.Sealund@Truebeck.com&quot;</span><span class="p">,,</span>
+<span class="linenos"> 9</span><span class="s2">&quot;User Removed&quot;</span><span class="p">,</span><span class="s2">&quot;Deirdre Bonitz&quot;</span><span class="p">,</span><span class="s2">&quot;DeirdreBonitz&quot;</span><span class="p">,</span><span class="s2">&quot;Deirdre.Bonitz@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,,</span>
+<span class="linenos">10</span><span class="s2">&quot;User Removed&quot;</span><span class="p">,</span><span class="s2">&quot;Kirbby Rodriguez&quot;</span><span class="p">,</span><span class="s2">&quot;KirbbyRodriguez&quot;</span><span class="p">,</span><span class="s2">&quot;Kirbby.Rodriguez@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,,</span>
+<span class="linenos">11</span><span class="s2">&quot;User Removed&quot;</span><span class="p">,</span><span class="s2">&quot;box sync&quot;</span><span class="p">,</span><span class="s2">&quot;boxsync&quot;</span><span class="p">,</span><span class="s2">&quot;box.sync@truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,,</span>
+<span class="linenos">12</span><span class="s2">&quot;User Removed&quot;</span><span class="p">,</span><span class="s2">&quot;Madison Truesdale&quot;</span><span class="p">,</span><span class="s2">&quot;MadisonTruesdale&quot;</span><span class="p">,</span><span class="s2">&quot;Madison.Truesdale@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,,</span>
+<span class="linenos">13</span><span class="s2">&quot;User Removed&quot;</span><span class="p">,</span><span class="s2">&quot;Stephen Kashani&quot;</span><span class="p">,</span><span class="s2">&quot;StephenKashani&quot;</span><span class="p">,</span><span class="s2">&quot;Stephen.Kashani@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,,</span>
+<span class="linenos">14</span><span class="s2">&quot;User Removed&quot;</span><span class="p">,</span><span class="s2">&quot;Kyle Merker&quot;</span><span class="p">,</span><span class="s2">&quot;KyleMerker&quot;</span><span class="p">,</span><span class="s2">&quot;Kyle.Merker@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,,</span>
+<span class="linenos">15</span><span class="s2">&quot;User Removed&quot;</span><span class="p">,</span><span class="s2">&quot;Christian Munoz&quot;</span><span class="p">,</span><span class="s2">&quot;ChristianMunoz&quot;</span><span class="p">,</span><span class="s2">&quot;Christian.Munoz@truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,,</span>
+<span class="linenos">16</span><span class="s2">&quot;Manager Changed&quot;</span><span class="p">,</span><span class="s2">&quot;Jared Putnam&quot;</span><span class="p">,</span><span class="s2">&quot;JaredPutnam&quot;</span><span class="p">,</span><span class="s2">&quot;Jared.Putnam@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;Richard Sealund&quot;</span><span class="p">,</span><span class="s2">&quot;Richard.Sealund@Truebeck.com&quot;</span><span class="p">,</span><span class="s2">&quot;Bobby Test&quot;</span><span class="p">,</span><span class="s2">&quot;Bobby.Test@Truebeck.com&quot;</span>
+</pre></div>
+</div>
+<p>It then creates an object array based on the discrepancies which contains objects for every instance where the action was “Changed Manager”. Then, the script makes another object array called $collabinfo, which contains every entry from CollaborationInfo.csv where “folderOwner” does not equal “addedEmail”.</p>
+<div class="highlight-Powershell notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="nv">$discrep</span> <span class="p">=</span> <span class="nv">$discrepancies</span> <span class="p">|</span> <span class="nb">Where-Object</span> <span class="p">{</span><span class="nv">$_</span><span class="p">.</span><span class="n">Action</span> <span class="o">-contains</span> <span class="s2">&quot;Manager Changed&quot;</span><span class="p">}</span>
+<span class="linenos">2</span><span class="nv">$collabinfo</span> <span class="p">=</span> <span class="nv">$collaborations</span> <span class="p">|</span> <span class="nb">Where-Object</span> <span class="p">{</span><span class="nv">$_</span><span class="p">.</span><span class="n">folderOwner</span> <span class="o">-ne</span> <span class="nv">$_</span><span class="p">.</span><span class="n">email</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Once the full array is made, the script iterates through each object, comparing to every object in $collabinfo (nested foreach-object loop). When comparing to the CollaborationInfo.csv file, it will be looking for matches between the $collabinfo.folderOwner value and $discrepancies.email.</p>
+<div class="highlight-Powershell notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="k">foreach</span> <span class="p">(</span><span class="nv">$discrepobject</span> <span class="k">in</span> <span class="nv">$discrep</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">2</span><span class="k">foreach</span> <span class="p">(</span><span class="nv">$collabobject</span> <span class="k">in</span> <span class="nv">$collabinfo</span><span class="p">)</span> <span class="p">{</span>
+</pre></div>
+</div>
+<p>If a match is found, it will then looks at $collabinfo.managerEmail and compares against $discrep.oldManagerEmail and $discrep.newManagerEmail.</p>
+<p>If a new collaboration is being added, all of the relevant information will be appended to the CollaborationInfo.csv file. If a collaboration is being deleted, the corresponding line in the CollaborationInfol.csv file will be deleted.</p>
+<p>Here is the script in it’s entirety:</p>
+</section>
+<section id="changemanagement-ps1">
+<h2>changemanagement.ps1<a class="headerlink" href="#changemanagement-ps1" title="Permalink to this heading"></a></h2>
+<div class="highlight-Powershell notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c"># Define the paths to the input CSV files</span>
+<span class="linenos">  2</span><span class="nv">$latestFile</span> <span class="p">=</span> <span class="s2">&quot;.\newInput\get-users-test.csv&quot;</span>
+<span class="linenos">  3</span><span class="nv">$secondLatestFile</span> <span class="p">=</span> <span class="s2">&quot;.\oldInput\get-users.csv&quot;</span>
+<span class="linenos">  4</span>
+<span class="linenos">  5</span><span class="c"># Define the path to the collaboration CSV file</span>
+<span class="linenos">  6</span><span class="nv">$collaborationFile</span> <span class="p">=</span> <span class="s2">&quot;.\newInput\CollaborationInfo.csv&quot;</span>
+<span class="linenos">  7</span>
+<span class="linenos">  8</span><span class="c"># Load the newest and second newest CSV files into variables and convert them to hash tables</span>
+<span class="linenos">  9</span><span class="nv">$oldUsers</span> <span class="p">=</span> <span class="p">@{}</span>
+<span class="linenos"> 10</span><span class="nv">$newUsers</span> <span class="p">=</span> <span class="p">@{}</span>
+<span class="linenos"> 11</span>
+<span class="linenos"> 12</span><span class="c"># Function to create a custom object for a user</span>
+<span class="linenos"> 13</span><span class="k">function</span> <span class="n">CreateUserObject</span><span class="p">(</span><span class="nv">$user</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 14</span>    <span class="nv">$name</span> <span class="p">=</span> <span class="nv">$user</span><span class="p">.</span><span class="n">firstName</span> <span class="p">+</span> <span class="s2">&quot; &quot;</span> <span class="p">+</span> <span class="nv">$user</span><span class="p">.</span><span class="n">lastName</span>
+<span class="linenos"> 15</span>    <span class="no">[PSCustomObject]</span><span class="p">@{</span>
+<span class="linenos"> 16</span>        <span class="n">name</span> <span class="p">=</span> <span class="nv">$name</span>
+<span class="linenos"> 17</span>        <span class="n">username</span> <span class="p">=</span> <span class="nv">$user</span><span class="p">.</span><span class="n">username</span>
+<span class="linenos"> 18</span>        <span class="n">email</span> <span class="p">=</span> <span class="nv">$user</span><span class="p">.</span><span class="n">email</span>
+<span class="linenos"> 19</span>        <span class="n">manager</span> <span class="p">=</span> <span class="nv">$user</span><span class="p">.</span><span class="n">manager</span>
+<span class="linenos"> 20</span>        <span class="n">managerEmail</span> <span class="p">=</span> <span class="nv">$user</span><span class="p">.</span><span class="n">managerEmail</span>
+<span class="linenos"> 21</span>    <span class="p">}</span>
+<span class="linenos"> 22</span><span class="p">}</span>
+<span class="linenos"> 23</span>
+<span class="linenos"> 24</span><span class="nb">Import-Csv</span> <span class="nv">$secondLatestFile</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span> <span class="nv">$oldUsers</span><span class="p">[</span><span class="nv">$_</span><span class="p">.</span><span class="n">username</span><span class="p">]</span> <span class="p">=</span> <span class="n">CreateUserObject</span> <span class="nv">$_</span> <span class="p">}</span>
+<span class="linenos"> 25</span><span class="nb">Import-Csv</span> <span class="nv">$latestFile</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span> <span class="nv">$newUsers</span><span class="p">[</span><span class="nv">$_</span><span class="p">.</span><span class="n">username</span><span class="p">]</span> <span class="p">=</span> <span class="n">CreateUserObject</span> <span class="nv">$_</span> <span class="p">}</span>
+<span class="linenos"> 26</span>
+<span class="linenos"> 27</span><span class="c"># Load the collaboration data from the CSV file</span>
+<span class="linenos"> 28</span><span class="nv">$collaborations</span> <span class="p">=</span> <span class="nb">Import-Csv</span> <span class="nv">$collaborationFile</span>
+<span class="linenos"> 29</span>
+<span class="linenos"> 30</span><span class="c"># Create an array to store discrepancies</span>
+<span class="linenos"> 31</span><span class="nv">$discrepancies</span> <span class="p">=</span> <span class="p">@()</span>
+<span class="linenos"> 32</span>
+<span class="linenos"> 33</span><span class="c"># Compare old and new users</span>
+<span class="linenos"> 34</span><span class="k">foreach</span> <span class="p">(</span><span class="nv">$oldUser</span> <span class="k">in</span> <span class="nv">$oldUsers</span><span class="p">.</span><span class="n">GetEnumerator</span><span class="p">())</span> <span class="p">{</span>
+<span class="linenos"> 35</span>    <span class="nv">$username</span> <span class="p">=</span> <span class="nv">$oldUser</span><span class="p">.</span><span class="n">Key</span>
+<span class="linenos"> 36</span>    <span class="nv">$oldUserInfo</span> <span class="p">=</span> <span class="nv">$oldUser</span><span class="p">.</span><span class="n">Value</span>
+<span class="linenos"> 37</span>    <span class="nv">$newUserInfo</span> <span class="p">=</span> <span class="nv">$newUsers</span><span class="p">[</span><span class="nv">$username</span><span class="p">]</span>
+<span class="linenos"> 38</span>
+<span class="linenos"> 39</span>    <span class="k">if</span> <span class="p">(!</span><span class="nv">$newUserInfo</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 40</span>        <span class="c"># User from the old file is not present in the new file</span>
+<span class="linenos"> 41</span>        <span class="nv">$discrepancies</span> <span class="p">+=</span> <span class="no">[PSCustomObject]</span><span class="p">@{</span>
+<span class="linenos"> 42</span>            <span class="n">Action</span> <span class="p">=</span> <span class="s2">&quot;User Removed&quot;</span>
+<span class="linenos"> 43</span>            <span class="n">name</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">name</span>
+<span class="linenos"> 44</span>            <span class="n">username</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">username</span>
+<span class="linenos"> 45</span>            <span class="n">email</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">email</span>
+<span class="linenos"> 46</span>            <span class="n">oldManager</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">manager</span>
+<span class="linenos"> 47</span>            <span class="n">oldManagerEmail</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">managerEmail</span>
+<span class="linenos"> 48</span>            <span class="n">newManager</span> <span class="p">=</span> <span class="nv">$null</span>  <span class="c"># Set to $null when user is removed</span>
+<span class="linenos"> 49</span>            <span class="n">newManagerEmail</span> <span class="p">=</span> <span class="nv">$null</span>  <span class="c"># Set to $null when user is removed</span>
+<span class="linenos"> 50</span>        <span class="p">}</span>
+<span class="linenos"> 51</span>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+<span class="linenos"> 52</span>        <span class="c"># User exists in both files, check for manager and managerEmail changes</span>
+<span class="linenos"> 53</span>        <span class="k">if</span> <span class="p">(</span><span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">manager</span> <span class="o">-ne</span> <span class="nv">$newUserInfo</span><span class="p">.</span><span class="n">manager</span> <span class="o">-or</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">managerEmail</span> <span class="o">-ne</span> <span class="nv">$newUserInfo</span><span class="p">.</span><span class="n">managerEmail</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 54</span>            <span class="nv">$discrepancies</span> <span class="p">+=</span> <span class="no">[PSCustomObject]</span><span class="p">@{</span>
+<span class="linenos"> 55</span>                <span class="n">Action</span> <span class="p">=</span> <span class="s2">&quot;Manager Changed&quot;</span>
+<span class="linenos"> 56</span>                <span class="n">name</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">name</span>
+<span class="linenos"> 57</span>                <span class="n">username</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">username</span>
+<span class="linenos"> 58</span>                <span class="n">email</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">email</span>
+<span class="linenos"> 59</span>                <span class="n">oldManager</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">manager</span>
+<span class="linenos"> 60</span>                <span class="n">oldManagerEmail</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">managerEmail</span>
+<span class="linenos"> 61</span>                <span class="n">newManager</span> <span class="p">=</span> <span class="nv">$newUserInfo</span><span class="p">.</span><span class="n">manager</span>
+<span class="linenos"> 62</span>                <span class="n">newManagerEmail</span> <span class="p">=</span> <span class="nv">$newUserInfo</span><span class="p">.</span><span class="n">managerEmail</span>
+<span class="linenos"> 63</span>            <span class="p">}</span>
+<span class="linenos"> 64</span>
+<span class="linenos"> 65</span>
+<span class="linenos"> 66</span>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+<span class="linenos"> 67</span>            <span class="c"># If the user&#39;s manager or managerEmail did not change, add the old values as well</span>
+<span class="linenos"> 68</span>            <span class="nv">$discrepancies</span> <span class="p">+=</span> <span class="no">[PSCustomObject]</span><span class="p">@{</span>
+<span class="linenos"> 69</span>                <span class="n">Action</span> <span class="p">=</span> <span class="s2">&quot;No Change&quot;</span>
+<span class="linenos"> 70</span>                <span class="n">name</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">name</span>
+<span class="linenos"> 71</span>                <span class="n">username</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">username</span>
+<span class="linenos"> 72</span>                <span class="n">email</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">email</span>
+<span class="linenos"> 73</span>                <span class="n">oldManager</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">manager</span>
+<span class="linenos"> 74</span>                <span class="n">oldManagerEmail</span> <span class="p">=</span> <span class="nv">$oldUserInfo</span><span class="p">.</span><span class="n">managerEmail</span>
+<span class="linenos"> 75</span>                <span class="n">newManager</span> <span class="p">=</span> <span class="nv">$null</span>  <span class="c"># Set to $null when there is no change</span>
+<span class="linenos"> 76</span>                <span class="n">newManagerEmail</span> <span class="p">=</span> <span class="nv">$null</span>  <span class="c"># Set to $null when there is no change</span>
+<span class="linenos"> 77</span>            <span class="p">}</span>
+<span class="linenos"> 78</span>        <span class="p">}</span>
+<span class="linenos"> 79</span>    <span class="p">}</span>
+<span class="linenos"> 80</span><span class="p">}</span>
+<span class="linenos"> 81</span>
+<span class="linenos"> 82</span><span class="c"># Display the discrepancies</span>
+<span class="linenos"> 83</span><span class="nv">$discrepancies</span> <span class="p">|</span> <span class="nb">Format-Table</span> <span class="n">-Property</span> <span class="n">Action</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">oldManager</span><span class="p">,</span> <span class="n">oldManagerEmail</span><span class="p">,</span> <span class="n">newManager</span><span class="p">,</span> <span class="n">newManagerEmail</span> <span class="n">-AutoSize</span>
+<span class="linenos"> 84</span>
+<span class="linenos"> 85</span><span class="c"># Export the discrepancies to a CSV file</span>
+<span class="linenos"> 86</span><span class="nv">$discrepancies</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="n">-Path</span> <span class="s2">&quot;.\Output\discrepancies.csv&quot;</span> <span class="n">-NoTypeInformation</span>
+<span class="linenos"> 87</span>
+<span class="linenos"> 88</span><span class="nv">$discrep</span> <span class="p">=</span> <span class="nv">$discrepancies</span> <span class="p">|</span> <span class="nb">Where-Object</span> <span class="p">{</span><span class="nv">$_</span><span class="p">.</span><span class="n">Action</span> <span class="o">-contains</span> <span class="s2">&quot;Manager Changed&quot;</span><span class="p">}</span>
+<span class="linenos"> 89</span><span class="nv">$collabinfo</span> <span class="p">=</span> <span class="nv">$collaborations</span> <span class="p">|</span> <span class="nb">Where-Object</span> <span class="p">{</span><span class="nv">$_</span><span class="p">.</span><span class="n">folderOwner</span> <span class="o">-ne</span> <span class="nv">$_</span><span class="p">.</span><span class="n">email</span><span class="p">}</span>
+<span class="linenos"> 90</span>
+<span class="linenos"> 91</span><span class="n">makeChanges</span> <span class="nv">$discrep</span> <span class="nv">$collabinfo</span>
+<span class="linenos"> 92</span>
+<span class="linenos"> 93</span><span class="c"># Function for adding new managers to folders and removing old managers from folders.</span>
+<span class="linenos"> 94</span><span class="k">function</span> <span class="n">makeChanges</span> <span class="p">(</span><span class="nv">$discrep</span><span class="p">,</span> <span class="nv">$collabinfo</span><span class="p">){</span>
+<span class="linenos"> 95</span>    <span class="c"># Iterate through $discrep, which is object array of instances where the manager changed.</span>
+<span class="linenos"> 96</span>    <span class="k">foreach</span> <span class="p">(</span><span class="nv">$discrepobject</span> <span class="k">in</span> <span class="nv">$discrep</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 97</span>        <span class="c"># Iterate through $collabobject, which is an object array of collaborations where the owner of the folder is not the same person who the collaboration is for.</span>
+<span class="linenos"> 98</span>        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$collabobject</span> <span class="k">in</span> <span class="nv">$collabinfo</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 99</span>            <span class="nb">echo </span><span class="s2">&quot;collab: </span><span class="p">$(</span><span class="nv">$collabobject</span><span class="p">.</span><span class="n">email</span><span class="p">)</span><span class="s2"> discrep: </span><span class="p">$(</span><span class="nv">$discrepobject</span><span class="p">.</span><span class="n">email</span><span class="p">)</span><span class="s2">&quot;</span>
+<span class="linenos">100</span>            <span class="k">if</span> <span class="p">(</span><span class="nv">$collabobject</span><span class="p">.</span><span class="n">folderOwner</span> <span class="o">-eq</span> <span class="nv">$discrepobject</span><span class="p">.</span><span class="n">email</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">101</span>                <span class="nb">Write-Host</span> <span class="s2">&quot;Match found for </span><span class="p">$(</span><span class="nv">$collabobject</span><span class="p">.</span><span class="n">folderOwner</span><span class="p">)</span><span class="s2"> and </span><span class="p">$(</span><span class="nv">$discrepobject</span><span class="p">.</span><span class="n">email</span><span class="p">)</span><span class="s2">&quot;</span>
+<span class="linenos">102</span>                <span class="k">if</span> <span class="p">(</span><span class="nv">$collabobject</span><span class="p">.</span><span class="n">email</span> <span class="o">-ne</span> <span class="nv">$discrepobject</span><span class="p">.</span><span class="n">newManagerEmail</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">103</span>                    <span class="nv">$newManagerResp</span> <span class="p">=</span> <span class="p">(</span><span class="n">box</span> <span class="n">folders</span><span class="p">:</span><span class="n">collaborations</span><span class="p">:</span><span class="n">add</span> <span class="nv">$collabobject</span><span class="p">.</span><span class="n">folderID</span> <span class="p">-</span><span class="n">-role</span> <span class="n">editor</span> <span class="p">-</span><span class="n">-login</span> <span class="p">$(</span><span class="nv">$discrepobject</span><span class="p">.</span><span class="n">newManagerEmail</span><span class="p">)</span> <span class="p">-</span><span class="n">-json</span> <span class="n">2</span><span class="p">&gt;&amp;</span><span class="n">1</span><span class="p">)</span>
+<span class="linenos">104</span>                    <span class="nv">$newManagerRespObj</span> <span class="p">=</span> <span class="nv">$newManagerResp</span> <span class="p">|</span> <span class="nb">ConvertFrom-JSON</span>
+<span class="linenos">105</span>                    <span class="nv">$CollaborationID</span> <span class="p">=</span> <span class="nv">$newManagerRespObj</span><span class="p">.</span><span class="n">id</span>
+<span class="linenos">106</span>                    <span class="nv">$folderName</span> <span class="p">=</span> <span class="nv">$newManagerRespObj</span><span class="p">.</span><span class="n">item</span><span class="p">.</span><span class="n">name</span>
+<span class="linenos">107</span>                    <span class="nv">$newcollaborations</span> <span class="p">+=</span> <span class="no">[PSCustomObject]</span><span class="p">@{</span>
+<span class="linenos">108</span>                        <span class="n">folderowner</span> <span class="p">=</span> <span class="nv">$collabobject</span><span class="p">.</span><span class="n">folderOwner</span>
+<span class="linenos">109</span>                        <span class="n">folderName</span> <span class="p">=</span> <span class="nv">$collabobject</span><span class="p">.</span><span class="n">folderName</span>
+<span class="linenos">110</span>                        <span class="n">added</span> <span class="p">=</span> <span class="nv">$discrepobject</span><span class="p">.</span><span class="n">newManager</span>
+<span class="linenos">111</span>                        <span class="n">email</span> <span class="p">=</span> <span class="nv">$discrepobject</span><span class="p">.</span><span class="n">newManagerEmail</span>
+<span class="linenos">112</span>                        <span class="n">collaborationID</span> <span class="p">=</span> <span class="nv">$CollaborationID</span>
+<span class="linenos">113</span>                        <span class="n">folderID</span> <span class="p">=</span> <span class="nv">$collabobject</span><span class="p">.</span><span class="n">folderID</span>
+<span class="linenos">114</span>                    <span class="p">}</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="n">-Path</span> <span class="nv">$collaborationFile</span> <span class="n">-NoTypeInformation</span> <span class="n">-Append</span>
+<span class="linenos">115</span>                    <span class="nb">Write-Host</span> <span class="s2">&quot;Added collaborator </span><span class="p">$(</span><span class="nv">$discrepobject</span><span class="p">.</span><span class="n">newManager</span><span class="p">)</span><span class="s2"> to $folderName.&quot;</span>
+<span class="linenos">116</span>                <span class="p">}</span>
+<span class="linenos">117</span>                <span class="k">if</span> <span class="p">(</span><span class="nv">$collabobject</span><span class="p">.</span><span class="n">email</span> <span class="o">-eq</span> <span class="nv">$discrepobject</span><span class="p">.</span><span class="n">oldManagerEmail</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">118</span>                    <span class="nv">$deleteManagerResp</span> <span class="p">=</span> <span class="p">(</span><span class="n">box</span> <span class="n">collaborations</span><span class="p">:</span><span class="n">delete</span> <span class="nv">$collabobject</span><span class="p">.</span><span class="n">collaborationID</span><span class="p">)</span>
+<span class="linenos">119</span>                    <span class="nb">Write-Host</span> <span class="s2">&quot;Removing collaboration with ID $collaborationID&quot;</span>
+<span class="linenos">120</span>                    <span class="c"># Remove the collaboration from the $collaborations array</span>
+<span class="linenos">121</span>                    <span class="nv">$global:collaborations</span> <span class="p">=</span> <span class="nv">$global:collaborations</span> <span class="p">|</span> <span class="nb">Where-Object</span> <span class="p">{</span> <span class="nv">$_</span><span class="p">.</span><span class="n">collaborationID</span> <span class="o">-ne</span> <span class="nv">$collabobject</span><span class="p">.</span><span class="n">collaborationID</span> <span class="p">}</span>
+<span class="linenos">122</span>                    <span class="c"># Export the updated $collaborations array back to the CSV file</span>
+<span class="linenos">123</span>                    <span class="nv">$global:collaborations</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="nv">$collaborationFile</span> <span class="n">-NoTypeInformation</span>
+<span class="linenos">124</span>                <span class="p">}</span>
+<span class="linenos">125</span>            <span class="k">else</span> <span class="p">{</span>
+<span class="linenos">126</span>                <span class="nb">Write-Host</span> <span class="s2">&quot;Folder owner </span><span class="p">$(</span><span class="nv">$collabobject</span><span class="p">.</span><span class="n">folderOwner</span><span class="p">)</span><span class="s2"> is not user from discrepancy </span><span class="p">$(</span><span class="nv">$discrepobject</span><span class="p">.</span><span class="n">email</span><span class="p">)</span><span class="s2">. Moving on.&quot;</span>
+<span class="linenos">127</span>            <span class="p">}</span>
+<span class="linenos">128</span>        <span class="p">}</span>
+<span class="linenos">129</span>    <span class="p">}</span>
+<span class="linenos">130</span>    <span class="p">}</span>
+<span class="linenos">131</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getadusers.html" class="btn btn-neutral float-left" title="Get-AD-Users.ps1" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Userprov.html" class="btn btn-neutral float-right" title="Userprov.ps1" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jeffrey Samuels, Hannah Brown.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

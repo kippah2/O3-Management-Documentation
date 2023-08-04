@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="MonthlyArchiveCreate.ps1" href="monthlyarchivecreate.html" />
-    <link rel="prev" title="Get-AD-Users.ps1" href="getadusers.html" /> 
+    <link rel="prev" title="ChangeManagerment.ps1" href="changemanagement.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -49,6 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="filestructure.html">File Structure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scriptsoverview.html">Scripts Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getadusers.html">Get-AD-Users.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changemanagement.html">ChangeManagerment.ps1</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Userprov.ps1</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#get-users-csv">get-users.csv</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#folder-structure-json">Folder_Structure.json</a></li>
@@ -179,337 +180,362 @@ users in Active Directory. This includes their <code class="docutils literal not
 <span class="linenos">  9</span>    <span class="c"># Will be used for mapping which folders files should be moved to in the MoveO3Notes.ps1 script</span>
 <span class="linenos"> 10</span>    <span class="no">[string]</span><span class="nv">$MasterMapFile</span> <span class="p">=</span> <span class="s2">&quot;..\MoveO3Notes\Input\MasterMap.csv&quot;</span><span class="p">,</span>
 <span class="linenos"> 11</span>
-<span class="linenos"> 12</span>    <span class="c"># Path to CSV where users to be added are stored.</span>
-<span class="linenos"> 13</span>    <span class="no">[string]</span><span class="nv">$EmployeeList</span> <span class="p">=</span> <span class="s2">&quot;..\Get-AD-Users\Output\get-users.csv&quot;</span><span class="p">,</span>
+<span class="linenos"> 12</span>    <span class="c"># This is the output CSV that keeps tracks of collaborations and is necessary for the changemanagement.ps1 script so that it may remove old supervisors from folders</span>
+<span class="linenos"> 13</span>    <span class="no">[string]</span><span class="nv">$CollaborationInfoCSV</span> <span class="p">=</span> <span class="s2">&quot;..\ChangeManagement\newInput\CollaborationInfo.csv&quot;</span><span class="p">,</span>
 <span class="linenos"> 14</span>
-<span class="linenos"> 15</span>    <span class="c"># Personal Folder Structure: Set either path build off JSON or directly upload a local folder</span>
-<span class="linenos"> 16</span>    <span class="no">[string]</span><span class="nv">$FolderStructureJSONPath</span> <span class="p">=</span> <span class="s2">&quot;.\Input\Folder_Structure.json&quot;</span><span class="p">,</span>
-<span class="linenos"> 17</span>    <span class="no">[string]</span><span class="nv">$LocalUploadPath</span> <span class="p">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="linenos"> 18</span>
-<span class="linenos"> 19</span>    <span class="c"># The string attached to the end of the folder created per user.</span>
-<span class="linenos"> 20</span>    <span class="no">[string]</span><span class="nv">$PersonalFolderSlug</span> <span class="p">=</span> <span class="s2">&quot;O3 Notes&quot;</span><span class="p">,</span>
+<span class="linenos"> 15</span>    <span class="c"># Path to CSV where users to be added are stored.</span>
+<span class="linenos"> 16</span>    <span class="no">[string]</span><span class="nv">$EmployeeList</span> <span class="p">=</span> <span class="s2">&quot;.\Input\get-users.csv&quot;</span><span class="p">,</span>
+<span class="linenos"> 17</span>
+<span class="linenos"> 18</span>    <span class="c"># Personal Folder Structure: Set either path build off JSON or directly upload a local folder</span>
+<span class="linenos"> 19</span>    <span class="no">[string]</span><span class="nv">$FolderStructureJSONPath</span> <span class="p">=</span> <span class="s2">&quot;.\Input\Folder_Structure.json&quot;</span><span class="p">,</span>
+<span class="linenos"> 20</span>    <span class="no">[string]</span><span class="nv">$LocalUploadPath</span> <span class="p">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
 <span class="linenos"> 21</span>
-<span class="linenos"> 22</span>    <span class="c"># ID of parent folder for created personal folders to be created in</span>
-<span class="linenos"> 23</span>    <span class="no">[string]</span><span class="nv">$PersonalFolderParentID</span> <span class="p">=</span> <span class="s2">&quot;218211112413&quot;</span>
-<span class="linenos"> 24</span><span class="p">)</span>
-<span class="linenos"> 25</span>
-<span class="linenos"> 26</span><span class="c"># Idk what this is for</span>
-<span class="linenos"> 27</span><span class="k">Function</span> <span class="nb">Get-Script</span><span class="n">-Name</span><span class="p">()</span> <span class="p">{</span>
-<span class="linenos"> 28</span>    <span class="nv">$filename</span> <span class="p">=</span> <span class="nv">$MyInvocation</span><span class="p">.</span><span class="n">ScriptName</span> <span class="p">|</span> <span class="nb">Split-Path</span> <span class="n">-Leaf</span> <span class="n">-ErrorAction</span> <span class="n">SilentlyContinue</span>
-<span class="linenos"> 29</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$filename</span> <span class="o">-match</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos"> 30</span>        <span class="nv">$filename</span> <span class="p">=</span> <span class="nv">$filename</span><span class="p">.</span><span class="n">Substring</span><span class="p">(</span><span class="n">0</span><span class="p">,</span> <span class="nv">$filename</span><span class="p">.</span><span class="n">LastIndexOf</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
-<span class="linenos"> 31</span>    <span class="p">}</span>
-<span class="linenos"> 32</span>
-<span class="linenos"> 33</span>    <span class="k">return</span> <span class="nv">$filename</span>
-<span class="linenos"> 34</span><span class="p">}</span>
+<span class="linenos"> 22</span>    <span class="c"># The string attached to the end of the folder created per user.</span>
+<span class="linenos"> 23</span>    <span class="no">[string]</span><span class="nv">$PersonalFolderSlug</span> <span class="p">=</span> <span class="s2">&quot;O3 Notes&quot;</span><span class="p">,</span>
+<span class="linenos"> 24</span>
+<span class="linenos"> 25</span>    <span class="c"># ID of parent folder for created personal folders to be created in</span>
+<span class="linenos"> 26</span>    <span class="no">[string]</span><span class="nv">$PersonalFolderParentID</span> <span class="p">=</span> <span class="s2">&quot;218211112413&quot;</span>
+<span class="linenos"> 27</span><span class="p">)</span>
+<span class="linenos"> 28</span>
+<span class="linenos"> 29</span><span class="c"># Idk what this is for</span>
+<span class="linenos"> 30</span><span class="k">Function</span> <span class="nb">Get-Script</span><span class="n">-Name</span><span class="p">()</span> <span class="p">{</span>
+<span class="linenos"> 31</span>    <span class="nv">$filename</span> <span class="p">=</span> <span class="nv">$MyInvocation</span><span class="p">.</span><span class="n">ScriptName</span> <span class="p">|</span> <span class="nb">Split-Path</span> <span class="n">-Leaf</span> <span class="n">-ErrorAction</span> <span class="n">SilentlyContinue</span>
+<span class="linenos"> 32</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$filename</span> <span class="o">-match</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 33</span>        <span class="nv">$filename</span> <span class="p">=</span> <span class="nv">$filename</span><span class="p">.</span><span class="n">Substring</span><span class="p">(</span><span class="n">0</span><span class="p">,</span> <span class="nv">$filename</span><span class="p">.</span><span class="n">LastIndexOf</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
+<span class="linenos"> 34</span>    <span class="p">}</span>
 <span class="linenos"> 35</span>
-<span class="linenos"> 36</span><span class="c"># I&#39;m assuming this is for the log file that gets made when the script is run.</span>
-<span class="linenos"> 37</span><span class="k">Function</span> <span class="nb">Write-Log</span> <span class="p">{</span> <span class="k">param</span> <span class="p">(</span><span class="no">[string]</span><span class="nv">$message</span><span class="p">,</span> <span class="no">[string]</span><span class="nv">$errorMessage</span> <span class="p">=</span> <span class="nv">$null</span><span class="p">,</span> <span class="no">[Exception]</span><span class="nv">$exception</span> <span class="p">=</span> <span class="nv">$null</span><span class="p">,</span> <span class="no">[string]</span><span class="nv">$output</span> <span class="p">=</span> <span class="nv">$false</span><span class="p">,</span> <span class="no">[string]</span><span class="nv">$color</span> <span class="p">=</span> <span class="s2">&quot;Green&quot;</span><span class="p">)</span>
+<span class="linenos"> 36</span>    <span class="k">return</span> <span class="nv">$filename</span>
+<span class="linenos"> 37</span><span class="p">}</span>
 <span class="linenos"> 38</span>
-<span class="linenos"> 39</span>    <span class="c"># Define log level - Can be &quot;errors&quot; or &quot;all&quot;</span>
-<span class="linenos"> 40</span>    <span class="nv">$logLevel</span> <span class="p">=</span> <span class="s2">&quot;all&quot;</span>
+<span class="linenos"> 39</span><span class="c"># I&#39;m assuming this is for the log file that gets made when the script is run.</span>
+<span class="linenos"> 40</span><span class="k">Function</span> <span class="nb">Write-Log</span> <span class="p">{</span> <span class="k">param</span> <span class="p">(</span><span class="no">[string]</span><span class="nv">$message</span><span class="p">,</span> <span class="no">[string]</span><span class="nv">$errorMessage</span> <span class="p">=</span> <span class="nv">$null</span><span class="p">,</span> <span class="no">[Exception]</span><span class="nv">$exception</span> <span class="p">=</span> <span class="nv">$null</span><span class="p">,</span> <span class="no">[string]</span><span class="nv">$output</span> <span class="p">=</span> <span class="nv">$false</span><span class="p">,</span> <span class="no">[string]</span><span class="nv">$color</span> <span class="p">=</span> <span class="s2">&quot;Green&quot;</span><span class="p">)</span>
 <span class="linenos"> 41</span>
-<span class="linenos"> 42</span>    <span class="c"># Create logs directory if it doesn&#39;t exist</span>
-<span class="linenos"> 43</span>    <span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="p">(</span><span class="nb">Test-Path</span> <span class="s2">&quot;.\logs&quot;</span><span class="p">))</span> <span class="p">{</span>
-<span class="linenos"> 44</span>        <span class="nb">New-Item</span> <span class="n">-Path</span> <span class="p">.</span> <span class="n">-Name</span> <span class="s2">&quot;logs&quot;</span> <span class="n">-ItemType</span> <span class="s1">&#39;directory&#39;</span> <span class="p">&gt;</span> <span class="nv">$null</span>
-<span class="linenos"> 45</span>    <span class="p">}</span>
-<span class="linenos"> 46</span>
-<span class="linenos"> 47</span>    <span class="nv">$dateTime</span> <span class="p">=</span> <span class="nb">Get-Date</span>
-<span class="linenos"> 48</span>
-<span class="linenos"> 49</span>    <span class="c"># Set log filename to the name of the script</span>
-<span class="linenos"> 50</span>    <span class="nv">$logFilename</span> <span class="p">=</span> <span class="nb">Get-Script</span><span class="n">-Name</span>
-<span class="linenos"> 51</span>    <span class="nv">$debugErrorFile</span> <span class="p">=</span> <span class="s2">&quot;.\logs\&quot;</span> <span class="p">+</span> <span class="nv">$logFilename</span> <span class="p">+</span> <span class="s2">&quot;_errors.txt&quot;</span>
-<span class="linenos"> 52</span>    <span class="nv">$debugAllFile</span> <span class="p">=</span> <span class="s2">&quot;.\logs\&quot;</span> <span class="p">+</span> <span class="nv">$logFilename</span> <span class="p">+</span> <span class="s2">&quot;_all.txt&quot;</span>
-<span class="linenos"> 53</span>
-<span class="linenos"> 54</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$exception</span> <span class="o">-or</span> <span class="nv">$errorMessage</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos"> 55</span>        <span class="nv">$severity</span> <span class="p">=</span> <span class="s2">&quot;ERROR&quot;</span>
-<span class="linenos"> 56</span>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-<span class="linenos"> 57</span>        <span class="nv">$severity</span> <span class="p">=</span> <span class="s2">&quot;INFO&quot;</span>
-<span class="linenos"> 58</span>    <span class="p">}</span>
-<span class="linenos"> 59</span>
-<span class="linenos"> 60</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$exception</span><span class="p">.</span><span class="n">Response</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos"> 61</span>        <span class="nv">$result</span> <span class="p">=</span> <span class="nv">$exception</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="n">GetResponseStream</span><span class="p">()</span>
-<span class="linenos"> 62</span>        <span class="nv">$reader</span> <span class="p">=</span> <span class="nb">New-Object</span> <span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">StreamReader</span><span class="p">(</span><span class="nv">$result</span><span class="p">)</span>
-<span class="linenos"> 63</span>        <span class="nv">$reader</span><span class="p">.</span><span class="n">BaseStream</span><span class="p">.</span><span class="k">Position</span> <span class="p">=</span> <span class="n">0</span>
-<span class="linenos"> 64</span>        <span class="nv">$reader</span><span class="p">.</span><span class="n">DiscardBufferedData</span><span class="p">()</span>
-<span class="linenos"> 65</span>        <span class="nv">$responseBody</span> <span class="p">=</span> <span class="nv">$reader</span><span class="p">.</span><span class="n">ReadToEnd</span><span class="p">();</span>
-<span class="linenos"> 66</span>    <span class="p">}</span>
-<span class="linenos"> 67</span>
-<span class="linenos"> 68</span>    <span class="nv">$logMessage</span> <span class="p">=</span> <span class="p">(</span><span class="nv">$severity</span> <span class="p">+</span> <span class="s2">&quot;</span><span class="se">`t</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos"> 69</span>    <span class="nv">$logMessage</span> <span class="p">+=</span> <span class="p">(</span><span class="nv">$dateTime</span><span class="p">)</span>
-<span class="linenos"> 70</span>    <span class="nv">$logMessage</span> <span class="p">+=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="se">`t</span><span class="s2">&quot;</span> <span class="p">+</span> <span class="nv">$message</span> <span class="p">+</span> <span class="s2">&quot;</span><span class="se">`t</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos"> 71</span>
-<span class="linenos"> 72</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$exception</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos"> 73</span>        <span class="nv">$logMessage</span> <span class="p">+=</span> <span class="p">(</span><span class="nv">$exception</span><span class="p">.</span><span class="n">Message</span> <span class="p">+</span> <span class="s2">&quot;</span><span class="se">`t</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos"> 74</span>    <span class="p">}</span>
-<span class="linenos"> 75</span>
-<span class="linenos"> 76</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$errorMessage</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos"> 77</span>        <span class="nv">$logMessage</span> <span class="p">+=</span> <span class="p">(</span><span class="nv">$errorMessage</span> <span class="p">+</span> <span class="s2">&quot;</span><span class="se">`t</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos"> 78</span>    <span class="p">}</span>
-<span class="linenos"> 79</span>
-<span class="linenos"> 80</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$responseBody</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos"> 81</span>        <span class="nv">$logMessage</span> <span class="p">+=</span> <span class="p">(</span><span class="s2">&quot;Box responded with: &quot;</span> <span class="p">+</span> <span class="nv">$responseBody</span> <span class="p">+</span> <span class="s2">&quot;</span><span class="se">`t</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos"> 82</span>    <span class="p">}</span>
-<span class="linenos"> 83</span>
-<span class="linenos"> 84</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$output</span> <span class="o">-eq</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos"> 85</span>        <span class="nb">Write-Host</span> <span class="nv">$message</span> <span class="n">-ForegroundColor</span> <span class="nv">$color</span>
-<span class="linenos"> 86</span>    <span class="p">}</span>
-<span class="linenos"> 87</span>
-<span class="linenos"> 88</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$logLevel</span> <span class="o">-eq</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos"> 89</span>        <span class="nv">$logMessage</span> <span class="p">|</span> <span class="nb">Add-Content</span> <span class="nv">$debugAllFile</span>
+<span class="linenos"> 42</span>    <span class="c"># Define log level - Can be &quot;errors&quot; or &quot;all&quot;</span>
+<span class="linenos"> 43</span>    <span class="nv">$logLevel</span> <span class="p">=</span> <span class="s2">&quot;all&quot;</span>
+<span class="linenos"> 44</span>
+<span class="linenos"> 45</span>    <span class="c"># Create logs directory if it doesn&#39;t exist</span>
+<span class="linenos"> 46</span>    <span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="p">(</span><span class="nb">Test-Path</span> <span class="s2">&quot;.\logs&quot;</span><span class="p">))</span> <span class="p">{</span>
+<span class="linenos"> 47</span>        <span class="nb">New-Item</span> <span class="n">-Path</span> <span class="p">.</span> <span class="n">-Name</span> <span class="s2">&quot;logs&quot;</span> <span class="n">-ItemType</span> <span class="s1">&#39;directory&#39;</span> <span class="p">&gt;</span> <span class="nv">$null</span>
+<span class="linenos"> 48</span>    <span class="p">}</span>
+<span class="linenos"> 49</span>
+<span class="linenos"> 50</span>    <span class="nv">$dateTime</span> <span class="p">=</span> <span class="nb">Get-Date</span>
+<span class="linenos"> 51</span>
+<span class="linenos"> 52</span>    <span class="c"># Set log filename to the name of the script</span>
+<span class="linenos"> 53</span>    <span class="nv">$logFilename</span> <span class="p">=</span> <span class="nb">Get-Script</span><span class="n">-Name</span>
+<span class="linenos"> 54</span>    <span class="nv">$debugErrorFile</span> <span class="p">=</span> <span class="s2">&quot;.\logs\&quot;</span> <span class="p">+</span> <span class="nv">$logFilename</span> <span class="p">+</span> <span class="s2">&quot;_errors.txt&quot;</span>
+<span class="linenos"> 55</span>    <span class="nv">$debugAllFile</span> <span class="p">=</span> <span class="s2">&quot;.\logs\&quot;</span> <span class="p">+</span> <span class="nv">$logFilename</span> <span class="p">+</span> <span class="s2">&quot;_all.txt&quot;</span>
+<span class="linenos"> 56</span>
+<span class="linenos"> 57</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$exception</span> <span class="o">-or</span> <span class="nv">$errorMessage</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 58</span>        <span class="nv">$severity</span> <span class="p">=</span> <span class="s2">&quot;ERROR&quot;</span>
+<span class="linenos"> 59</span>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+<span class="linenos"> 60</span>        <span class="nv">$severity</span> <span class="p">=</span> <span class="s2">&quot;INFO&quot;</span>
+<span class="linenos"> 61</span>    <span class="p">}</span>
+<span class="linenos"> 62</span>
+<span class="linenos"> 63</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$exception</span><span class="p">.</span><span class="n">Response</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 64</span>        <span class="nv">$result</span> <span class="p">=</span> <span class="nv">$exception</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="n">GetResponseStream</span><span class="p">()</span>
+<span class="linenos"> 65</span>        <span class="nv">$reader</span> <span class="p">=</span> <span class="nb">New-Object</span> <span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">StreamReader</span><span class="p">(</span><span class="nv">$result</span><span class="p">)</span>
+<span class="linenos"> 66</span>        <span class="nv">$reader</span><span class="p">.</span><span class="n">BaseStream</span><span class="p">.</span><span class="k">Position</span> <span class="p">=</span> <span class="n">0</span>
+<span class="linenos"> 67</span>        <span class="nv">$reader</span><span class="p">.</span><span class="n">DiscardBufferedData</span><span class="p">()</span>
+<span class="linenos"> 68</span>        <span class="nv">$responseBody</span> <span class="p">=</span> <span class="nv">$reader</span><span class="p">.</span><span class="n">ReadToEnd</span><span class="p">();</span>
+<span class="linenos"> 69</span>    <span class="p">}</span>
+<span class="linenos"> 70</span>
+<span class="linenos"> 71</span>    <span class="nv">$logMessage</span> <span class="p">=</span> <span class="p">(</span><span class="nv">$severity</span> <span class="p">+</span> <span class="s2">&quot;</span><span class="se">`t</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 72</span>    <span class="nv">$logMessage</span> <span class="p">+=</span> <span class="p">(</span><span class="nv">$dateTime</span><span class="p">)</span>
+<span class="linenos"> 73</span>    <span class="nv">$logMessage</span> <span class="p">+=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="se">`t</span><span class="s2">&quot;</span> <span class="p">+</span> <span class="nv">$message</span> <span class="p">+</span> <span class="s2">&quot;</span><span class="se">`t</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 74</span>
+<span class="linenos"> 75</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$exception</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 76</span>        <span class="nv">$logMessage</span> <span class="p">+=</span> <span class="p">(</span><span class="nv">$exception</span><span class="p">.</span><span class="n">Message</span> <span class="p">+</span> <span class="s2">&quot;</span><span class="se">`t</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 77</span>    <span class="p">}</span>
+<span class="linenos"> 78</span>
+<span class="linenos"> 79</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$errorMessage</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 80</span>        <span class="nv">$logMessage</span> <span class="p">+=</span> <span class="p">(</span><span class="nv">$errorMessage</span> <span class="p">+</span> <span class="s2">&quot;</span><span class="se">`t</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 81</span>    <span class="p">}</span>
+<span class="linenos"> 82</span>
+<span class="linenos"> 83</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$responseBody</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 84</span>        <span class="nv">$logMessage</span> <span class="p">+=</span> <span class="p">(</span><span class="s2">&quot;Box responded with: &quot;</span> <span class="p">+</span> <span class="nv">$responseBody</span> <span class="p">+</span> <span class="s2">&quot;</span><span class="se">`t</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 85</span>    <span class="p">}</span>
+<span class="linenos"> 86</span>
+<span class="linenos"> 87</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$output</span> <span class="o">-eq</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 88</span>        <span class="nb">Write-Host</span> <span class="nv">$message</span> <span class="n">-ForegroundColor</span> <span class="nv">$color</span>
+<span class="linenos"> 89</span>    <span class="p">}</span>
 <span class="linenos"> 90</span>
-<span class="linenos"> 91</span>        <span class="k">if</span> <span class="p">(</span><span class="nv">$severity</span> <span class="o">-eq</span> <span class="s2">&quot;ERROR&quot;</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos"> 92</span>            <span class="nv">$logMessage</span> <span class="p">|</span> <span class="nb">Add-Content</span> <span class="nv">$debugErrorFile</span>
-<span class="linenos"> 93</span>        <span class="p">}</span>
-<span class="linenos"> 94</span>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-<span class="linenos"> 95</span>        <span class="k">if</span> <span class="p">(</span><span class="nv">$severity</span> <span class="o">-eq</span> <span class="s2">&quot;ERROR&quot;</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos"> 96</span>            <span class="nv">$logMessage</span> <span class="p">|</span> <span class="nb">Add-Content</span> <span class="nv">$debugErrorFile</span>
-<span class="linenos"> 97</span>        <span class="p">}</span>
-<span class="linenos"> 98</span>    <span class="p">}</span>
-<span class="linenos"> 99</span><span class="p">}</span>
-<span class="linenos">100</span>
-<span class="linenos">101</span><span class="c"># This class is used for setting/restoring analytics client header when running this script</span>
-<span class="linenos">102</span><span class="c"># Idk what this is for either, probably logging</span>
-<span class="linenos">103</span><span class="n">class</span> <span class="n">AnalyticsClientManager</span> <span class="p">{</span>
-<span class="linenos">104</span>    <span class="no">[string]</span><span class="nv">$TemporaryAnalyticsClientName</span>
-<span class="linenos">105</span>    <span class="no">[string]</span><span class="nv">$OriginalAnalyticsClientName</span>
-<span class="linenos">106</span>    <span class="no">[bool]</span><span class="nv">$IsOriginalAnalyticsClientEnabled</span>
-<span class="linenos">107</span>
-<span class="linenos">108</span>    <span class="n">AnalyticsClientManager</span><span class="p">(</span><span class="no">[string]</span><span class="nv">$temporaryAnalyticsClientName</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos">109</span>        <span class="nv">$this</span><span class="p">.</span><span class="n">TemporaryAnalyticsClientName</span> <span class="p">=</span> <span class="s2">&quot;box_sample_scripts </span><span class="p">$(</span><span class="nv">$temporaryAnalyticsClientName</span><span class="p">)</span><span class="s2">&quot;</span>
-<span class="linenos">110</span>    <span class="p">}</span>
-<span class="linenos">111</span>
-<span class="linenos">112</span>    <span class="no">[bool]</span> <span class="n">IsAnalyticsClientSupported</span><span class="p">()</span> <span class="p">{</span>
-<span class="linenos">113</span>        <span class="k">return</span> <span class="s2">&quot;</span><span class="p">$(</span><span class="n">box</span> <span class="n">configure</span><span class="p">:</span><span class="n">settings</span> <span class="p">-</span><span class="n">-help</span><span class="p">)</span><span class="s2">&quot;</span> <span class="o">-like</span> <span class="s2">&quot;*--analytics-client-name*--json*&quot;</span>
-<span class="linenos">114</span>    <span class="p">}</span>
-<span class="linenos">115</span>
-<span class="linenos">116</span>    <span class="no">[void]</span> <span class="n">StoreOriginalSettings</span><span class="p">()</span> <span class="p">{</span>
-<span class="linenos">117</span>        <span class="nv">$SettingsContent</span> <span class="p">=</span> <span class="s2">&quot;</span><span class="p">$(</span><span class="n">box</span> <span class="n">configure</span><span class="p">:</span><span class="n">settings</span> <span class="p">-</span><span class="n">-json</span><span class="p">)</span><span class="s2">&quot;</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span>
+<span class="linenos"> 91</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$logLevel</span> <span class="o">-eq</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 92</span>        <span class="nv">$logMessage</span> <span class="p">|</span> <span class="nb">Add-Content</span> <span class="nv">$debugAllFile</span>
+<span class="linenos"> 93</span>
+<span class="linenos"> 94</span>        <span class="k">if</span> <span class="p">(</span><span class="nv">$severity</span> <span class="o">-eq</span> <span class="s2">&quot;ERROR&quot;</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 95</span>            <span class="nv">$logMessage</span> <span class="p">|</span> <span class="nb">Add-Content</span> <span class="nv">$debugErrorFile</span>
+<span class="linenos"> 96</span>        <span class="p">}</span>
+<span class="linenos"> 97</span>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+<span class="linenos"> 98</span>        <span class="k">if</span> <span class="p">(</span><span class="nv">$severity</span> <span class="o">-eq</span> <span class="s2">&quot;ERROR&quot;</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos"> 99</span>            <span class="nv">$logMessage</span> <span class="p">|</span> <span class="nb">Add-Content</span> <span class="nv">$debugErrorFile</span>
+<span class="linenos">100</span>        <span class="p">}</span>
+<span class="linenos">101</span>    <span class="p">}</span>
+<span class="linenos">102</span><span class="p">}</span>
+<span class="linenos">103</span>
+<span class="linenos">104</span><span class="c"># This class is used for setting/restoring analytics client header when running this script</span>
+<span class="linenos">105</span><span class="c"># Idk what this is for either, probably logging</span>
+<span class="linenos">106</span><span class="n">class</span> <span class="n">AnalyticsClientManager</span> <span class="p">{</span>
+<span class="linenos">107</span>    <span class="no">[string]</span><span class="nv">$TemporaryAnalyticsClientName</span>
+<span class="linenos">108</span>    <span class="no">[string]</span><span class="nv">$OriginalAnalyticsClientName</span>
+<span class="linenos">109</span>    <span class="no">[bool]</span><span class="nv">$IsOriginalAnalyticsClientEnabled</span>
+<span class="linenos">110</span>
+<span class="linenos">111</span>    <span class="n">AnalyticsClientManager</span><span class="p">(</span><span class="no">[string]</span><span class="nv">$temporaryAnalyticsClientName</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">112</span>        <span class="nv">$this</span><span class="p">.</span><span class="n">TemporaryAnalyticsClientName</span> <span class="p">=</span> <span class="s2">&quot;box_sample_scripts </span><span class="p">$(</span><span class="nv">$temporaryAnalyticsClientName</span><span class="p">)</span><span class="s2">&quot;</span>
+<span class="linenos">113</span>    <span class="p">}</span>
+<span class="linenos">114</span>
+<span class="linenos">115</span>    <span class="no">[bool]</span> <span class="n">IsAnalyticsClientSupported</span><span class="p">()</span> <span class="p">{</span>
+<span class="linenos">116</span>        <span class="k">return</span> <span class="s2">&quot;</span><span class="p">$(</span><span class="n">box</span> <span class="n">configure</span><span class="p">:</span><span class="n">settings</span> <span class="p">-</span><span class="n">-help</span><span class="p">)</span><span class="s2">&quot;</span> <span class="o">-like</span> <span class="s2">&quot;*--analytics-client-name*--json*&quot;</span>
+<span class="linenos">117</span>    <span class="p">}</span>
 <span class="linenos">118</span>
-<span class="linenos">119</span>        <span class="nv">$this</span><span class="p">.</span><span class="n">OriginalAnalyticsClientName</span> <span class="p">=</span> <span class="nv">$SettingsContent</span><span class="p">.</span><span class="n">AnalyticsClient</span><span class="p">.</span><span class="n">Name</span>
-<span class="linenos">120</span>        <span class="k">if</span> <span class="p">(!</span><span class="nv">$this</span><span class="p">.</span><span class="n">OriginalAnalyticsClientName</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos">121</span>            <span class="nv">$this</span><span class="p">.</span><span class="n">OriginalAnalyticsClientName</span> <span class="p">=</span> <span class="s2">&quot;cli&quot;</span>
-<span class="linenos">122</span>        <span class="p">}</span>
-<span class="linenos">123</span>
-<span class="linenos">124</span>        <span class="k">if</span><span class="p">(</span><span class="nv">$SettingsContent</span><span class="p">.</span><span class="n">EnableanalyticsClient</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos">125</span>            <span class="nv">$this</span><span class="p">.</span><span class="n">IsOriginalAnalyticsClientEnabled</span> <span class="p">=</span> <span class="nv">$true</span>
-<span class="linenos">126</span>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-<span class="linenos">127</span>            <span class="nv">$this</span><span class="p">.</span><span class="n">IsOriginalAnalyticsClientEnabled</span> <span class="p">=</span> <span class="nv">$false</span>
-<span class="linenos">128</span>        <span class="p">}</span>
-<span class="linenos">129</span>
-<span class="linenos">130</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Stored original analytics client settings, name: </span><span class="p">$(</span><span class="nv">$this</span><span class="p">.</span><span class="n">OriginalAnalyticsClientName</span><span class="p">)</span><span class="s2">, enabled: </span><span class="p">$(</span><span class="nv">$this</span><span class="p">.</span><span class="n">IsOriginalAnalyticsClientEnabled</span><span class="p">)</span><span class="s2">.&quot;</span> <span class="n">-output</span> <span class="n">false</span>
-<span class="linenos">131</span>    <span class="p">}</span>
+<span class="linenos">119</span>    <span class="no">[void]</span> <span class="n">StoreOriginalSettings</span><span class="p">()</span> <span class="p">{</span>
+<span class="linenos">120</span>        <span class="nv">$SettingsContent</span> <span class="p">=</span> <span class="s2">&quot;</span><span class="p">$(</span><span class="n">box</span> <span class="n">configure</span><span class="p">:</span><span class="n">settings</span> <span class="p">-</span><span class="n">-json</span><span class="p">)</span><span class="s2">&quot;</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span>
+<span class="linenos">121</span>
+<span class="linenos">122</span>        <span class="nv">$this</span><span class="p">.</span><span class="n">OriginalAnalyticsClientName</span> <span class="p">=</span> <span class="nv">$SettingsContent</span><span class="p">.</span><span class="n">AnalyticsClient</span><span class="p">.</span><span class="n">Name</span>
+<span class="linenos">123</span>        <span class="k">if</span> <span class="p">(!</span><span class="nv">$this</span><span class="p">.</span><span class="n">OriginalAnalyticsClientName</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">124</span>            <span class="nv">$this</span><span class="p">.</span><span class="n">OriginalAnalyticsClientName</span> <span class="p">=</span> <span class="s2">&quot;cli&quot;</span>
+<span class="linenos">125</span>        <span class="p">}</span>
+<span class="linenos">126</span>
+<span class="linenos">127</span>        <span class="k">if</span><span class="p">(</span><span class="nv">$SettingsContent</span><span class="p">.</span><span class="n">EnableanalyticsClient</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">128</span>            <span class="nv">$this</span><span class="p">.</span><span class="n">IsOriginalAnalyticsClientEnabled</span> <span class="p">=</span> <span class="nv">$true</span>
+<span class="linenos">129</span>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+<span class="linenos">130</span>            <span class="nv">$this</span><span class="p">.</span><span class="n">IsOriginalAnalyticsClientEnabled</span> <span class="p">=</span> <span class="nv">$false</span>
+<span class="linenos">131</span>        <span class="p">}</span>
 <span class="linenos">132</span>
-<span class="linenos">133</span>    <span class="no">[void]</span> <span class="n">RestoreOriginalSettings</span><span class="p">()</span> <span class="p">{</span>
-<span class="linenos">134</span>        <span class="k">if</span> <span class="p">(</span><span class="nv">$this</span><span class="p">.</span><span class="n">IsOriginalAnalyticsClientEnabled</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos">135</span>            <span class="nv">$RestoreAnalyticsClientEnablementState</span> <span class="p">=</span> <span class="s2">&quot;--enable-analytics-client&quot;</span>
-<span class="linenos">136</span>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-<span class="linenos">137</span>            <span class="nv">$RestoreAnalyticsClientEnablementState</span> <span class="p">=</span> <span class="s2">&quot;--no-enable-analytics-client&quot;</span>
-<span class="linenos">138</span>        <span class="p">}</span>
-<span class="linenos">139</span>
-<span class="linenos">140</span>        <span class="s2">&quot;</span><span class="p">$(</span><span class="n">box</span> <span class="n">configure</span><span class="p">:</span><span class="n">settings</span> <span class="nv">$RestoreAnalyticsClientEnablementState</span> <span class="p">-</span><span class="n">-analytics-client-name</span><span class="p">=$(</span><span class="nv">$this</span><span class="p">.</span><span class="n">OriginalAnalyticsClientName</span><span class="p">))</span><span class="s2">&quot;</span>
-<span class="linenos">141</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Restored original analytics client settings, name: </span><span class="p">$(</span><span class="nv">$this</span><span class="p">.</span><span class="n">OriginalAnalyticsClientName</span><span class="p">)</span><span class="s2">, enabled: </span><span class="p">$(</span><span class="nv">$this</span><span class="p">.</span><span class="n">IsOriginalAnalyticsClientEnabled</span><span class="p">)</span><span class="s2">.&quot;</span> <span class="n">-output</span> <span class="n">false</span>
-<span class="linenos">142</span>    <span class="p">}</span>
-<span class="linenos">143</span>
-<span class="linenos">144</span>    <span class="no">[void]</span> <span class="n">SetScriptAnalyticsClient</span><span class="p">()</span> <span class="p">{</span>
-<span class="linenos">145</span>        <span class="k">if</span> <span class="p">(</span><span class="nv">$this</span><span class="p">.</span><span class="n">IsAnalyticsClientSupported</span><span class="p">())</span> <span class="p">{</span>
-<span class="linenos">146</span>            <span class="nv">$this</span><span class="p">.</span><span class="n">StoreOriginalSettings</span><span class="p">()</span>
-<span class="linenos">147</span>
-<span class="linenos">148</span>            <span class="s2">&quot;</span><span class="p">$(</span><span class="n">box</span> <span class="n">configure</span><span class="p">:</span><span class="n">settings</span> <span class="p">-</span><span class="n">-enable-analytics-client</span> <span class="p">-</span><span class="n">-analytics-client-name</span><span class="p">=$(</span><span class="nv">$this</span><span class="p">.</span><span class="n">TemporaryAnalyticsClientName</span><span class="p">))</span><span class="s2">&quot;</span>
-<span class="linenos">149</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Set temporarily analytics client settings, name: </span><span class="p">$(</span><span class="nv">$this</span><span class="p">.</span><span class="n">TemporaryAnalyticsClientName</span><span class="p">)</span><span class="s2">, enabled: true.&quot;</span> <span class="n">-output</span> <span class="n">false</span>
-<span class="linenos">150</span>        <span class="p">}</span>
-<span class="linenos">151</span>    <span class="p">}</span>
-<span class="linenos">152</span>
-<span class="linenos">153</span>    <span class="no">[void]</span> <span class="n">UnsetScriptAnalyticsClients</span><span class="p">()</span> <span class="p">{</span>
-<span class="linenos">154</span>        <span class="k">if</span> <span class="p">(</span><span class="nv">$this</span><span class="p">.</span><span class="n">IsAnalyticsClientSupported</span><span class="p">())</span> <span class="p">{</span>
-<span class="linenos">155</span>            <span class="nv">$this</span><span class="p">.</span><span class="n">RestoreOriginalSettings</span><span class="p">()</span>
-<span class="linenos">156</span>        <span class="p">}</span>
-<span class="linenos">157</span>    <span class="p">}</span>
-<span class="linenos">158</span><span class="p">}</span>
-<span class="linenos">159</span>
-<span class="linenos">160</span><span class="c">##########################################################</span>
-<span class="linenos">161</span>
-<span class="linenos">162</span><span class="c"># First function to run.</span>
-<span class="linenos">163</span><span class="k">Function</span> <span class="nb">Start-Users</span><span class="n">-Provisoning-Creation-Script</span> <span class="p">{</span>
-<span class="linenos">164</span>    <span class="nb">Write-Log</span> <span class="s2">&quot;Starting User Creation &amp; Personal Folder Provisioning script...&quot;</span> <span class="n">-output</span> <span class="n">true</span>
-<span class="linenos">165</span>
-<span class="linenos">166</span>    <span class="k">try</span> <span class="p">{</span>
-<span class="linenos">167</span>        <span class="c"># Import CSV with employees to make folders for</span>
-<span class="linenos">168</span>        <span class="nv">$Employees</span> <span class="p">=</span> <span class="nb">Import-Csv</span> <span class="nv">$EmployeeList</span>
-<span class="linenos">169</span>        <span class="nb">Write-Log</span> <span class="nv">$Employees</span> <span class="n">-output</span> <span class="n">true</span>
-<span class="linenos">170</span>    <span class="p">}</span>
-<span class="linenos">171</span>    <span class="k">catch</span> <span class="p">{</span>
-<span class="linenos">172</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to load mock employee data. Exits script.&quot;</span> <span class="n">-errorMessage</span> <span class="s2">&quot;Invalid input data.&quot;</span> <span class="n">-output</span> <span class="n">true</span> <span class="n">-color</span> <span class="n">Red</span>
-<span class="linenos">173</span>        <span class="k">break</span>
-<span class="linenos">174</span>    <span class="p">}</span>
-<span class="linenos">175</span>
-<span class="linenos">176</span>    <span class="k">try</span> <span class="p">{</span>
-<span class="linenos">177</span>        <span class="c">#Create Managed Users and Provision Personal Folder</span>
-<span class="linenos">178</span>        <span class="nb">New-Provision</span><span class="n">-Managed-User</span>
-<span class="linenos">179</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Users and Folders Created Successfully&quot;</span> <span class="n">-output</span> <span class="n">true</span>
-<span class="linenos">180</span>    <span class="p">}</span>
-<span class="linenos">181</span>    <span class="k">catch</span> <span class="p">{</span>
-<span class="linenos">182</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to create managed users.&quot;</span> <span class="n">-errorMessage</span> <span class="s2">&quot;Something went wrong&quot;</span> <span class="n">-output</span> <span class="n">true</span> <span class="n">-color</span> <span class="n">Red</span>
+<span class="linenos">133</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Stored original analytics client settings, name: </span><span class="p">$(</span><span class="nv">$this</span><span class="p">.</span><span class="n">OriginalAnalyticsClientName</span><span class="p">)</span><span class="s2">, enabled: </span><span class="p">$(</span><span class="nv">$this</span><span class="p">.</span><span class="n">IsOriginalAnalyticsClientEnabled</span><span class="p">)</span><span class="s2">.&quot;</span> <span class="n">-output</span> <span class="n">false</span>
+<span class="linenos">134</span>    <span class="p">}</span>
+<span class="linenos">135</span>
+<span class="linenos">136</span>    <span class="no">[void]</span> <span class="n">RestoreOriginalSettings</span><span class="p">()</span> <span class="p">{</span>
+<span class="linenos">137</span>        <span class="k">if</span> <span class="p">(</span><span class="nv">$this</span><span class="p">.</span><span class="n">IsOriginalAnalyticsClientEnabled</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">138</span>            <span class="nv">$RestoreAnalyticsClientEnablementState</span> <span class="p">=</span> <span class="s2">&quot;--enable-analytics-client&quot;</span>
+<span class="linenos">139</span>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+<span class="linenos">140</span>            <span class="nv">$RestoreAnalyticsClientEnablementState</span> <span class="p">=</span> <span class="s2">&quot;--no-enable-analytics-client&quot;</span>
+<span class="linenos">141</span>        <span class="p">}</span>
+<span class="linenos">142</span>
+<span class="linenos">143</span>        <span class="s2">&quot;</span><span class="p">$(</span><span class="n">box</span> <span class="n">configure</span><span class="p">:</span><span class="n">settings</span> <span class="nv">$RestoreAnalyticsClientEnablementState</span> <span class="p">-</span><span class="n">-analytics-client-name</span><span class="p">=$(</span><span class="nv">$this</span><span class="p">.</span><span class="n">OriginalAnalyticsClientName</span><span class="p">))</span><span class="s2">&quot;</span>
+<span class="linenos">144</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Restored original analytics client settings, name: </span><span class="p">$(</span><span class="nv">$this</span><span class="p">.</span><span class="n">OriginalAnalyticsClientName</span><span class="p">)</span><span class="s2">, enabled: </span><span class="p">$(</span><span class="nv">$this</span><span class="p">.</span><span class="n">IsOriginalAnalyticsClientEnabled</span><span class="p">)</span><span class="s2">.&quot;</span> <span class="n">-output</span> <span class="n">false</span>
+<span class="linenos">145</span>    <span class="p">}</span>
+<span class="linenos">146</span>
+<span class="linenos">147</span>    <span class="no">[void]</span> <span class="n">SetScriptAnalyticsClient</span><span class="p">()</span> <span class="p">{</span>
+<span class="linenos">148</span>        <span class="k">if</span> <span class="p">(</span><span class="nv">$this</span><span class="p">.</span><span class="n">IsAnalyticsClientSupported</span><span class="p">())</span> <span class="p">{</span>
+<span class="linenos">149</span>            <span class="nv">$this</span><span class="p">.</span><span class="n">StoreOriginalSettings</span><span class="p">()</span>
+<span class="linenos">150</span>
+<span class="linenos">151</span>            <span class="s2">&quot;</span><span class="p">$(</span><span class="n">box</span> <span class="n">configure</span><span class="p">:</span><span class="n">settings</span> <span class="p">-</span><span class="n">-enable-analytics-client</span> <span class="p">-</span><span class="n">-analytics-client-name</span><span class="p">=$(</span><span class="nv">$this</span><span class="p">.</span><span class="n">TemporaryAnalyticsClientName</span><span class="p">))</span><span class="s2">&quot;</span>
+<span class="linenos">152</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Set temporarily analytics client settings, name: </span><span class="p">$(</span><span class="nv">$this</span><span class="p">.</span><span class="n">TemporaryAnalyticsClientName</span><span class="p">)</span><span class="s2">, enabled: true.&quot;</span> <span class="n">-output</span> <span class="n">false</span>
+<span class="linenos">153</span>        <span class="p">}</span>
+<span class="linenos">154</span>    <span class="p">}</span>
+<span class="linenos">155</span>
+<span class="linenos">156</span>    <span class="no">[void]</span> <span class="n">UnsetScriptAnalyticsClients</span><span class="p">()</span> <span class="p">{</span>
+<span class="linenos">157</span>        <span class="k">if</span> <span class="p">(</span><span class="nv">$this</span><span class="p">.</span><span class="n">IsAnalyticsClientSupported</span><span class="p">())</span> <span class="p">{</span>
+<span class="linenos">158</span>            <span class="nv">$this</span><span class="p">.</span><span class="n">RestoreOriginalSettings</span><span class="p">()</span>
+<span class="linenos">159</span>        <span class="p">}</span>
+<span class="linenos">160</span>    <span class="p">}</span>
+<span class="linenos">161</span><span class="p">}</span>
+<span class="linenos">162</span>
+<span class="linenos">163</span><span class="c">##########################################################</span>
+<span class="linenos">164</span>
+<span class="linenos">165</span><span class="c"># First function to run.</span>
+<span class="linenos">166</span><span class="k">Function</span> <span class="nb">Start-Users</span><span class="n">-Provisoning-Creation-Script</span> <span class="p">{</span>
+<span class="linenos">167</span>    <span class="nb">Write-Log</span> <span class="s2">&quot;Starting User Creation &amp; Personal Folder Provisioning script...&quot;</span> <span class="n">-output</span> <span class="n">true</span>
+<span class="linenos">168</span>
+<span class="linenos">169</span>    <span class="k">try</span> <span class="p">{</span>
+<span class="linenos">170</span>        <span class="c"># Import CSV with employees to make folders for</span>
+<span class="linenos">171</span>        <span class="nv">$Employees</span> <span class="p">=</span> <span class="nb">Import-Csv</span> <span class="nv">$EmployeeList</span>
+<span class="linenos">172</span>        <span class="nb">Write-Log</span> <span class="nv">$Employees</span> <span class="n">-output</span> <span class="n">true</span>
+<span class="linenos">173</span>    <span class="p">}</span>
+<span class="linenos">174</span>    <span class="k">catch</span> <span class="p">{</span>
+<span class="linenos">175</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to load mock employee data. Exits script.&quot;</span> <span class="n">-errorMessage</span> <span class="s2">&quot;Invalid input data.&quot;</span> <span class="n">-output</span> <span class="n">true</span> <span class="n">-color</span> <span class="n">Red</span>
+<span class="linenos">176</span>        <span class="k">break</span>
+<span class="linenos">177</span>    <span class="p">}</span>
+<span class="linenos">178</span>
+<span class="linenos">179</span>    <span class="k">try</span> <span class="p">{</span>
+<span class="linenos">180</span>        <span class="c">#Create Managed Users and Provision Personal Folder</span>
+<span class="linenos">181</span>        <span class="nb">New-Provision</span><span class="n">-Managed-User</span>
+<span class="linenos">182</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Users and Folders Created Successfully&quot;</span> <span class="n">-output</span> <span class="n">true</span>
 <span class="linenos">183</span>    <span class="p">}</span>
-<span class="linenos">184</span>
-<span class="linenos">185</span><span class="p">}</span>
-<span class="linenos">186</span>
+<span class="linenos">184</span>    <span class="k">catch</span> <span class="p">{</span>
+<span class="linenos">185</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to create managed users.&quot;</span> <span class="n">-errorMessage</span> <span class="s2">&quot;Something went wrong&quot;</span> <span class="n">-output</span> <span class="n">true</span> <span class="n">-color</span> <span class="n">Red</span>
+<span class="linenos">186</span>    <span class="p">}</span>
 <span class="linenos">187</span>
-<span class="linenos">188</span><span class="c"># Provision Box accounts for employee and their supervisor.</span>
-<span class="linenos">189</span><span class="k">Function</span> <span class="nb">New-Provision</span><span class="n">-Managed-User</span> <span class="p">{</span>
-<span class="linenos">190</span>    <span class="k">ForEach</span> <span class="p">(</span><span class="nv">$Employee</span> <span class="k">in</span> <span class="nv">$Employees</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos">191</span>        <span class="nv">$managerEmail</span> <span class="p">=</span> <span class="nv">$Employee</span><span class="p">.</span><span class="n">managerEmail</span>
-<span class="linenos">192</span>        <span class="nv">$email</span> <span class="p">=</span> <span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span>
-<span class="linenos">193</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Creating employee Managed User account with first name: </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">firstName</span><span class="p">)</span><span class="s2">, last name: </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">lastName</span><span class="p">)</span><span class="s2">, email: </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span><span class="p">)</span><span class="s2">&quot;</span> <span class="n">-output</span> <span class="n">True</span>
-<span class="linenos">194</span>        <span class="c"># Create Managed User</span>
-<span class="linenos">195</span>        <span class="k">try</span> <span class="p">{</span>
-<span class="linenos">196</span>            <span class="c"># This is the command for adding a user to box. Their username is the combination of fName+lName and their email is also attached. These are all defined in the input CSV file.</span>
-<span class="linenos">197</span>            <span class="nv">$CreatedManagedUserResp</span> <span class="p">=</span> <span class="p">(</span><span class="n">box</span> <span class="n">users</span><span class="p">:</span><span class="n">create</span> <span class="s2">&quot;</span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">firstName</span><span class="p">)</span><span class="s2"> </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">lastName</span><span class="p">)</span><span class="s2">&quot;</span> <span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span> <span class="p">-</span><span class="n">-json</span> <span class="n">2</span><span class="p">&gt;&amp;</span><span class="n">1</span><span class="p">)</span>
-<span class="linenos">198</span>            <span class="nv">$ManagedUserID</span> <span class="p">=</span> <span class="nv">$CreatedManagedUserResp</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span> <span class="nv">$_</span><span class="p">.</span><span class="n">id</span> <span class="p">}</span>
-<span class="linenos">199</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Created Managed user for email: </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span><span class="p">)</span><span class="s2"> where ID: </span><span class="p">$(</span><span class="nv">$ManagedUserID</span><span class="p">)</span><span class="s2">.&quot;</span> <span class="n">-output</span> <span class="n">True</span>
-<span class="linenos">200</span>        <span class="p">}</span>
-<span class="linenos">201</span>        <span class="k">catch</span> <span class="p">{</span>
-<span class="linenos">202</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to create Managed User for email: </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span><span class="p">)</span><span class="s2">. Skipping this user. See log for details.&quot;</span> <span class="n">-errorMessage</span> <span class="nv">$CreatedManagedUserResp</span> <span class="n">-output</span> <span class="n">true</span> <span class="n">-color</span> <span class="n">Red</span>
-<span class="linenos">203</span>            <span class="c"># Calls Create-Folders function even if user provisioning failed.</span>
-<span class="linenos">204</span>            <span class="n">Create-Folders</span>
-<span class="linenos">205</span>        <span class="p">}</span>
-<span class="linenos">206</span>    <span class="p">}</span>
-<span class="linenos">207</span><span class="p">}</span>
-<span class="linenos">208</span>
-<span class="linenos">209</span><span class="k">Function</span> <span class="n">Create-Folders</span> <span class="p">{</span>
-<span class="linenos">210</span>        <span class="k">try</span> <span class="p">{</span>
-<span class="linenos">211</span>            <span class="c"># If a username is not supplied in the csv, the email address is used instead</span>
-<span class="linenos">212</span>            <span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">username</span><span class="p">)){</span>
-<span class="linenos">213</span>                <span class="nv">$script:PersonalFolderName</span> <span class="p">=</span> <span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span><span class="p">)</span> <span class="p">+</span> <span class="s2">&quot;&#39;s &quot;</span> <span class="p">+</span> <span class="nv">$PersonalFolderSlug</span>
-<span class="linenos">214</span>            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-<span class="linenos">215</span>                <span class="nv">$script:PersonalFolderName</span> <span class="p">=</span> <span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">username</span><span class="p">)</span> <span class="p">+</span> <span class="s2">&quot;&#39;s &quot;</span> <span class="p">+</span> <span class="nv">$PersonalFolderSlug</span>
-<span class="linenos">216</span>            <span class="p">}</span>
-<span class="linenos">217</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Personal Folder Name: $PersonalFolderName &quot;</span> <span class="n">-output</span> <span class="n">True</span>
-<span class="linenos">218</span>            <span class="k">if</span> <span class="p">(</span><span class="nv">$FolderStructureJSONPath</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos">219</span>                <span class="c"># Create Folder Structure from JSON</span>
-<span class="linenos">220</span>                <span class="nb">New-Folder</span><span class="n">-Structure</span>
-<span class="linenos">221</span>            <span class="p">}</span>
-<span class="linenos">222</span>            <span class="k">elseif</span> <span class="p">(</span><span class="nv">$LocalUploadPath</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos">223</span>                <span class="c"># OR directly upload Folder structure to current user&#39;s root folder from local directory</span>
-<span class="linenos">224</span>                <span class="nv">$UploadedFoldersResp</span> <span class="p">=</span> <span class="n">box</span> <span class="n">folders</span><span class="p">:</span><span class="n">upload</span> <span class="nv">$LocalUploadPath</span> <span class="p">-</span><span class="n">-parent-folder</span><span class="p">=</span><span class="nv">$PersonalFolderParentID</span> <span class="p">-</span><span class="n">-folder-name</span><span class="p">=</span><span class="nv">$script:PersonalFolderName</span> <span class="p">-</span><span class="n">-json</span> <span class="n">2</span><span class="p">&gt;&amp;</span><span class="n">1</span>
-<span class="linenos">225</span>                <span class="nv">$script:PersonalFolderID</span> <span class="p">=</span> <span class="nv">$UploadedFoldersResp</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span> <span class="nv">$_</span><span class="p">.</span><span class="n">id</span> <span class="p">}</span>
-<span class="linenos">226</span>            <span class="p">}</span>
-<span class="linenos">227</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Uploaded local folder structure to </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">username</span><span class="p">)</span><span class="s2">&#39;s O3 Notes folder with ID </span><span class="p">$(</span><span class="nv">$script:PersonalFolderID</span><span class="p">)</span><span class="s2"> where parent ID: $PersonalFolderParentID.&quot;</span> <span class="n">-output</span> <span class="n">true</span>
-<span class="linenos">228</span>        <span class="p">}</span>
-<span class="linenos">229</span>        <span class="k">catch</span> <span class="p">{</span>
-<span class="linenos">230</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to upload local folder structure to parent folder with ID $PersonalFolderParentID.&quot;</span> <span class="n">-errorMessage</span> <span class="nv">$UploadedFoldersResp</span> <span class="n">-output</span> <span class="n">true</span> <span class="n">-color</span> <span class="n">Red</span>
-<span class="linenos">231</span>
-<span class="linenos">232</span>        <span class="p">}</span>
-<span class="linenos">233</span>
-<span class="linenos">234</span>        <span class="c"># Collaborate New Managed User to Folder Structure owned by current user</span>
-<span class="linenos">235</span>        <span class="k">try</span> <span class="p">{</span>
-<span class="linenos">236</span>            <span class="nv">$CollaboratedResp</span> <span class="p">=</span> <span class="n">box</span> <span class="n">folders</span><span class="p">:</span><span class="n">collaborations</span><span class="p">:</span><span class="n">add</span> <span class="nv">$script:PersonalFolderID</span> <span class="p">-</span><span class="n">-role</span><span class="p">=</span><span class="n">viewer</span> <span class="p">-</span><span class="n">-login</span><span class="p">=</span><span class="nv">$email</span> <span class="p">-</span><span class="n">-json</span> <span class="n">2</span><span class="p">&gt;&amp;</span><span class="n">1</span>
-<span class="linenos">237</span>            <span class="nv">$CollaboratedResp</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span> <span class="p">|</span> <span class="nb">Out-Null</span>
-<span class="linenos">238</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Collaborated User </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">firstName</span><span class="p">)</span><span class="s2"> </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">lastName</span><span class="p">)</span><span class="s2"> to </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">username</span><span class="p">)</span><span class="s2">&#39;s indicated folder for provisioning with ID: $script:PersonalFolderID.&quot;</span> <span class="n">-output</span> <span class="n">True</span>
-<span class="linenos">239</span>        <span class="p">}</span>
-<span class="linenos">240</span>        <span class="k">catch</span> <span class="p">{</span>
-<span class="linenos">241</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to create collaboration for user </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">firstName</span><span class="p">)</span><span class="s2"> </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">lastName</span><span class="p">)</span><span class="s2"> with ID: $ManagedUserID, to folder ID: $script:PersonalFolderID. See log for details.&quot;</span> <span class="n">-errorMessage</span> <span class="nv">$CollaboratedResp</span> <span class="n">-output</span> <span class="n">true</span> <span class="n">-color</span> <span class="n">Red</span>
-<span class="linenos">242</span>        <span class="p">}</span>
-<span class="linenos">243</span>        <span class="k">try</span> <span class="p">{</span>
-<span class="linenos">244</span>            <span class="c"># Added new lines below to give supervisor access</span>
-<span class="linenos">245</span>            <span class="nv">$SupervisorResp</span> <span class="p">=</span> <span class="n">box</span> <span class="n">folders</span><span class="p">:</span><span class="n">collaborations</span><span class="p">:</span><span class="n">add</span> <span class="nv">$script:PersonalFolderID</span> <span class="p">-</span><span class="n">-role</span><span class="p">=</span><span class="n">editor</span> <span class="p">-</span><span class="n">-login</span><span class="p">=</span><span class="nv">$managerEmail</span> <span class="p">-</span><span class="n">-json</span> <span class="n">2</span><span class="p">&gt;&amp;</span><span class="n">1</span>
-<span class="linenos">246</span>            <span class="nv">$SupervisorResp</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span> <span class="p">|</span> <span class="nb">Out-Null</span>
-<span class="linenos">247</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Supervisor User </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">manager</span><span class="p">)</span><span class="s2"> to </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">usernmae</span><span class="p">)</span><span class="s2"> indicated folder for provisioning with ID $script:PersonalFolderID&quot;</span> <span class="n">-output</span> <span class="n">True</span>
-<span class="linenos">248</span>        <span class="p">}</span>
-<span class="linenos">249</span>        <span class="k">catch</span> <span class="p">{</span>
-<span class="linenos">250</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to create collaboration for Supervisor </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">manager</span><span class="p">)</span><span class="s2"> to folder ID: $script:PersonalFolderID. See log for details.&quot;</span> <span class="n">-errorMessage</span> <span class="nv">$CollaboratedResp</span> <span class="n">-output</span> <span class="n">true</span> <span class="n">-color</span> <span class="n">Red</span>
-<span class="linenos">251</span>            <span class="k">continue</span>
-<span class="linenos">252</span>        <span class="p">}</span>
+<span class="linenos">188</span><span class="p">}</span>
+<span class="linenos">189</span>
+<span class="linenos">190</span>
+<span class="linenos">191</span><span class="c"># Provision Box accounts for employee and their supervisor.</span>
+<span class="linenos">192</span><span class="k">Function</span> <span class="nb">New-Provision</span><span class="n">-Managed-User</span> <span class="p">{</span>
+<span class="linenos">193</span>    <span class="k">ForEach</span> <span class="p">(</span><span class="nv">$Employee</span> <span class="k">in</span> <span class="nv">$Employees</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">194</span>        <span class="nv">$managerEmail</span> <span class="p">=</span> <span class="nv">$Employee</span><span class="p">.</span><span class="n">managerEmail</span>
+<span class="linenos">195</span>        <span class="nv">$email</span> <span class="p">=</span> <span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span>
+<span class="linenos">196</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Creating employee Managed User account with first name: </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">firstName</span><span class="p">)</span><span class="s2">, last name: </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">lastName</span><span class="p">)</span><span class="s2">, email: </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span><span class="p">)</span><span class="s2">&quot;</span> <span class="n">-output</span> <span class="n">True</span>
+<span class="linenos">197</span>        <span class="c"># Create Managed User</span>
+<span class="linenos">198</span>        <span class="k">try</span> <span class="p">{</span>
+<span class="linenos">199</span>            <span class="c"># This is the command for adding a user to box. Their username is the combination of fName+lName and their email is also attached. These are all defined in the input CSV file.</span>
+<span class="linenos">200</span>            <span class="nv">$CreatedManagedUserResp</span> <span class="p">=</span> <span class="p">(</span><span class="n">box</span> <span class="n">users</span><span class="p">:</span><span class="n">create</span> <span class="s2">&quot;</span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">firstName</span><span class="p">)</span><span class="s2"> </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">lastName</span><span class="p">)</span><span class="s2">&quot;</span> <span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span> <span class="p">-</span><span class="n">-json</span> <span class="n">2</span><span class="p">&gt;&amp;</span><span class="n">1</span><span class="p">)</span>
+<span class="linenos">201</span>            <span class="nv">$ManagedUserID</span> <span class="p">=</span> <span class="nv">$CreatedManagedUserResp</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span> <span class="nv">$_</span><span class="p">.</span><span class="n">id</span> <span class="p">}</span>
+<span class="linenos">202</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Created Managed user for email: </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span><span class="p">)</span><span class="s2"> where ID: </span><span class="p">$(</span><span class="nv">$ManagedUserID</span><span class="p">)</span><span class="s2">.&quot;</span> <span class="n">-output</span> <span class="n">True</span>
+<span class="linenos">203</span>        <span class="p">}</span>
+<span class="linenos">204</span>        <span class="k">catch</span> <span class="p">{</span>
+<span class="linenos">205</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to create Managed User for email: </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span><span class="p">)</span><span class="s2">. Skipping this user. See log for details.&quot;</span> <span class="n">-errorMessage</span> <span class="nv">$CreatedManagedUserResp</span> <span class="n">-output</span> <span class="n">true</span> <span class="n">-color</span> <span class="n">Red</span>
+<span class="linenos">206</span>            <span class="c"># Calls Create-Folders function even if user provisioning failed.</span>
+<span class="linenos">207</span>            <span class="n">Create-Folders</span>
+<span class="linenos">208</span>        <span class="p">}</span>
+<span class="linenos">209</span>    <span class="p">}</span>
+<span class="linenos">210</span><span class="p">}</span>
+<span class="linenos">211</span>
+<span class="linenos">212</span><span class="k">Function</span> <span class="n">Create-Folders</span> <span class="p">{</span>
+<span class="linenos">213</span>        <span class="k">try</span> <span class="p">{</span>
+<span class="linenos">214</span>            <span class="c"># If a username is not supplied in the csv, the email address is used instead</span>
+<span class="linenos">215</span>            <span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">username</span><span class="p">)){</span>
+<span class="linenos">216</span>                <span class="nv">$script:PersonalFolderName</span> <span class="p">=</span> <span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span><span class="p">)</span> <span class="p">+</span> <span class="s2">&quot;&#39;s &quot;</span> <span class="p">+</span> <span class="nv">$PersonalFolderSlug</span>
+<span class="linenos">217</span>            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+<span class="linenos">218</span>                <span class="nv">$script:PersonalFolderName</span> <span class="p">=</span> <span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">username</span><span class="p">)</span> <span class="p">+</span> <span class="s2">&quot;&#39;s &quot;</span> <span class="p">+</span> <span class="nv">$PersonalFolderSlug</span>
+<span class="linenos">219</span>            <span class="p">}</span>
+<span class="linenos">220</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Personal Folder Name: $PersonalFolderName &quot;</span> <span class="n">-output</span> <span class="n">True</span>
+<span class="linenos">221</span>            <span class="k">if</span> <span class="p">(</span><span class="nv">$FolderStructureJSONPath</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">222</span>                <span class="c"># Create Folder Structure from JSON</span>
+<span class="linenos">223</span>                <span class="nb">New-Folder</span><span class="n">-Structure</span>
+<span class="linenos">224</span>            <span class="p">}</span>
+<span class="linenos">225</span>            <span class="k">elseif</span> <span class="p">(</span><span class="nv">$LocalUploadPath</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">226</span>                <span class="c"># OR directly upload Folder structure to current user&#39;s root folder from local directory</span>
+<span class="linenos">227</span>                <span class="nv">$UploadedFoldersResp</span> <span class="p">=</span> <span class="n">box</span> <span class="n">folders</span><span class="p">:</span><span class="n">upload</span> <span class="nv">$LocalUploadPath</span> <span class="p">-</span><span class="n">-parent-folder</span><span class="p">=</span><span class="nv">$PersonalFolderParentID</span> <span class="p">-</span><span class="n">-folder-name</span><span class="p">=</span><span class="nv">$script:PersonalFolderName</span> <span class="p">-</span><span class="n">-json</span> <span class="n">2</span><span class="p">&gt;&amp;</span><span class="n">1</span>
+<span class="linenos">228</span>                <span class="nv">$script:PersonalFolderID</span> <span class="p">=</span> <span class="nv">$UploadedFoldersResp</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span> <span class="nv">$_</span><span class="p">.</span><span class="n">id</span> <span class="p">}</span>
+<span class="linenos">229</span>            <span class="p">}</span>
+<span class="linenos">230</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Uploaded local folder structure to </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">username</span><span class="p">)</span><span class="s2">&#39;s O3 Notes folder with ID </span><span class="p">$(</span><span class="nv">$script:PersonalFolderID</span><span class="p">)</span><span class="s2"> where parent ID: $PersonalFolderParentID.&quot;</span> <span class="n">-output</span> <span class="n">true</span>
+<span class="linenos">231</span>        <span class="p">}</span>
+<span class="linenos">232</span>        <span class="k">catch</span> <span class="p">{</span>
+<span class="linenos">233</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to upload local folder structure to parent folder with ID $PersonalFolderParentID.&quot;</span> <span class="n">-errorMessage</span> <span class="nv">$UploadedFoldersResp</span> <span class="n">-output</span> <span class="n">true</span> <span class="n">-color</span> <span class="n">Red</span>
+<span class="linenos">234</span>
+<span class="linenos">235</span>        <span class="p">}</span>
+<span class="linenos">236</span>
+<span class="linenos">237</span>            <span class="c"># Collaborate New Managed User to Folder Structure owned by current user</span>
+<span class="linenos">238</span>    <span class="k">try</span> <span class="p">{</span>
+<span class="linenos">239</span>        <span class="nv">$CollaboratedResp</span> <span class="p">=</span> <span class="n">box</span> <span class="n">folders</span><span class="p">:</span><span class="n">collaborations</span><span class="p">:</span><span class="n">add</span> <span class="nv">$script:PersonalFolderID</span> <span class="p">-</span><span class="n">-role</span><span class="p">=</span><span class="n">viewer</span> <span class="p">-</span><span class="n">-login</span><span class="p">=</span><span class="nv">$email</span> <span class="p">-</span><span class="n">-json</span> <span class="n">2</span><span class="p">&gt;&amp;</span><span class="n">1</span>
+<span class="linenos">240</span>        <span class="nv">$CollaboratedRespObj</span> <span class="p">=</span> <span class="nv">$CollaboratedResp</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span>
+<span class="linenos">241</span>        <span class="nv">$CollaborationID</span> <span class="p">=</span> <span class="nv">$CollaboratedRespObj</span><span class="p">.</span><span class="n">id</span>
+<span class="linenos">242</span>
+<span class="linenos">243</span>        <span class="no">[PSCustomObject]</span><span class="p">@{</span>
+<span class="linenos">244</span>            <span class="n">folderOwner</span> <span class="p">=</span> <span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span>
+<span class="linenos">245</span>            <span class="n">folderName</span> <span class="p">=</span> <span class="nv">$script:PersonalFolderName</span>
+<span class="linenos">246</span>            <span class="n">added</span> <span class="p">=</span> <span class="nv">$Employee</span><span class="p">.</span><span class="n">firstName</span> <span class="p">+</span> <span class="s2">&quot; &quot;</span> <span class="p">+</span> <span class="nv">$Employee</span><span class="p">.</span><span class="n">lastName</span>
+<span class="linenos">247</span>            <span class="n">email</span> <span class="p">=</span> <span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span>
+<span class="linenos">248</span>            <span class="n">collaborationID</span> <span class="p">=</span> <span class="nv">$CollaborationID</span>
+<span class="linenos">249</span>            <span class="n">folderID</span> <span class="p">=</span> <span class="nv">$script:PersonalFolderID</span>
+<span class="linenos">250</span>        <span class="p">}</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="n">-Path</span> <span class="nv">$CollaborationInfoCSV</span> <span class="n">-NoTypeInformation</span> <span class="n">-Append</span>
+<span class="linenos">251</span>
+<span class="linenos">252</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Collaborated Managed User </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">firstName</span><span class="p">)</span><span class="s2"> </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">lastName</span><span class="p">)</span><span class="s2"> to </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">username</span><span class="p">)</span><span class="s2"> indicated folder for provisioning with ID: $script:PersonalFolderID and collaboration ID: $CollaborationID.&quot;</span> <span class="n">-output</span> <span class="n">True</span>
 <span class="linenos">253</span>    <span class="p">}</span>
-<span class="linenos">254</span>
-<span class="linenos">255</span>    <span class="c"># Create folder sturcture form JSON file</span>
-<span class="linenos">256</span><span class="k">Function</span> <span class="nb">New-Folder</span><span class="n">-Structure</span> <span class="p">{</span>
-<span class="linenos">257</span>    <span class="c"># Extract folder structure from json</span>
-<span class="linenos">258</span>    <span class="nb">Write-Log</span> <span class="s2">&quot;Extracting folder structure&quot;</span> <span class="n">-output</span> <span class="n">True</span>
-<span class="linenos">259</span>    <span class="k">try</span> <span class="p">{</span>
-<span class="linenos">260</span>        <span class="nv">$FolderStructure</span> <span class="p">=</span> <span class="nb">Get-Content</span> <span class="n">-Raw</span> <span class="n">-Path</span> <span class="nv">$FolderStructureJSONPath</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span>
-<span class="linenos">261</span>    <span class="p">}</span>
-<span class="linenos">262</span>    <span class="k">catch</span> <span class="p">{</span>
-<span class="linenos">263</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Error reading &#39;$FolderStructureJSONPath&#39;. Exits script.&quot;</span><span class="p">.</span> <span class="n">-errorMessage</span> <span class="s2">&quot;Invalid input data.&quot;</span>  <span class="n">-output</span> <span class="n">True</span> <span class="n">-color</span> <span class="n">Red</span>
-<span class="linenos">264</span>        <span class="k">break</span>
-<span class="linenos">265</span>    <span class="p">}</span>
-<span class="linenos">266</span>
-<span class="linenos">267</span>    <span class="c"># Create Personal Root folder</span>
-<span class="linenos">268</span>    <span class="k">try</span> <span class="p">{</span>
-<span class="linenos">269</span>        <span class="nv">$CreatedPersonalFolderResp</span> <span class="p">=</span> <span class="n">box</span> <span class="n">folders</span><span class="p">:</span><span class="n">create</span> <span class="s2">&quot;$PersonalFolderParentID&quot;</span> <span class="s2">&quot;$script:PersonalFolderName&quot;</span> <span class="p">-</span><span class="n">-json</span> <span class="n">2</span><span class="p">&gt;&amp;</span><span class="n">1</span>
-<span class="linenos">270</span>        <span class="nv">$script:PersonalFolderID</span> <span class="p">=</span> <span class="nv">$CreatedPersonalFolderResp</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span> <span class="nv">$_</span><span class="p">.</span><span class="n">id</span> <span class="p">}</span>
-<span class="linenos">271</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Created a user owned &#39;$PersonalFolderSlug&#39; folder with id: </span><span class="p">$(</span><span class="nv">$script:PersonalFolderID</span><span class="p">)</span><span class="s2">.&quot;</span> <span class="n">-output</span> <span class="n">True</span>
-<span class="linenos">272</span>    <span class="p">}</span>
-<span class="linenos">273</span>    <span class="k">catch</span> <span class="p">{</span>
-<span class="linenos">274</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to create &#39;$script:PersonalFolderName&#39; folder. See log for details.&quot;</span><span class="p">.</span> <span class="n">-errorMessage</span> <span class="nv">$CreatedPersonalFolderResp</span> <span class="n">-output</span> <span class="n">True</span> <span class="n">-color</span> <span class="n">Red</span>
-<span class="linenos">275</span>
-<span class="linenos">276</span>    <span class="p">}</span>
-<span class="linenos">277</span>
-<span class="linenos">278</span>    <span class="c"># Create all folders structure from json file, where $PersonalFolderSlug is the parent</span>
-<span class="linenos">279</span>    <span class="nb">New-Subfolders</span><span class="n">-Recursively</span> <span class="s2">&quot;$script:PersonalFolderID&quot;</span> <span class="s2">&quot;$script:PersonalFolderName&quot;</span> <span class="nv">$FolderStructure</span>
-<span class="linenos">280</span><span class="p">}</span>
-<span class="linenos">281</span>
-<span class="linenos">282</span><span class="k">Function</span> <span class="nb">New-Subfolders</span><span class="n">-Recursively</span> <span class="p">{</span>
-<span class="linenos">283</span>    <span class="k">Param</span>
-<span class="linenos">284</span>    <span class="p">(</span>
-<span class="linenos">285</span>        <span class="p">[</span><span class="k">Parameter</span><span class="p">(</span><span class="k">Mandatory</span><span class="p">=</span><span class="nv">$true</span><span class="p">,</span> <span class="k">Position</span><span class="p">=</span><span class="n">0</span><span class="p">)]</span>
-<span class="linenos">286</span>        <span class="no">[string]</span> <span class="nv">$ParentFolderId</span><span class="p">,</span>
-<span class="linenos">287</span>        <span class="p">[</span><span class="k">Parameter</span><span class="p">(</span><span class="k">Mandatory</span><span class="p">=</span><span class="nv">$true</span><span class="p">,</span> <span class="k">Position</span><span class="p">=</span><span class="n">1</span><span class="p">)]</span>
-<span class="linenos">288</span>        <span class="no">[string]</span> <span class="nv">$ParentFolderName</span><span class="p">,</span>
-<span class="linenos">289</span>        <span class="p">[</span><span class="k">Parameter</span><span class="p">(</span><span class="k">Mandatory</span><span class="p">=</span><span class="nv">$true</span><span class="p">,</span> <span class="k">Position</span><span class="p">=</span><span class="n">2</span><span class="p">)]</span>
-<span class="linenos">290</span>        <span class="no">[System.Object[]]</span> <span class="nv">$Children</span>
-<span class="linenos">291</span>    <span class="p">)</span>
-<span class="linenos">292</span>
-<span class="linenos">293</span>    <span class="k">ForEach</span> <span class="p">(</span><span class="nv">$child</span> <span class="k">in</span> <span class="nv">$Children</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos">294</span>        <span class="k">try</span> <span class="p">{</span>
-<span class="linenos">295</span>            <span class="nv">$CreatedChildFolderResp</span> <span class="p">=</span> <span class="n">box</span> <span class="n">folders</span><span class="p">:</span><span class="n">create</span> <span class="s2">&quot;</span><span class="p">$(</span><span class="nv">$ParentFolderId</span><span class="p">)</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="p">$(</span><span class="nv">$child</span><span class="p">.</span><span class="n">name</span><span class="p">)</span><span class="s2">&quot;</span> <span class="p">-</span><span class="n">-fields</span><span class="p">=</span><span class="s2">&quot;id,name&quot;</span> <span class="p">-</span><span class="n">-json</span> <span class="n">2</span><span class="p">&gt;&amp;</span><span class="n">1</span>
-<span class="linenos">296</span>            <span class="nv">$CreatedChildFolder</span> <span class="p">=</span> <span class="nv">$CreatedChildFolderResp</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span>
-<span class="linenos">297</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Created subfolder &#39;</span><span class="p">$(</span><span class="nv">$child</span><span class="p">.</span><span class="n">name</span><span class="p">)</span><span class="s2">&#39; with id: </span><span class="p">$(</span><span class="nv">$CreatedChildFolder</span><span class="p">.</span><span class="n">id</span><span class="p">)</span><span class="s2"> under &#39;$ParentFolderName&#39; (ID: $ParentFolderId) folder.&quot;</span> <span class="n">-output</span> <span class="n">True</span>
-<span class="linenos">298</span>            <span class="k">if</span> <span class="p">(</span><span class="nv">$child</span><span class="p">.</span><span class="n">name</span> <span class="o">-eq</span> <span class="s1">&#39;Active&#39;</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos">299</span>                <span class="nv">$activeFolderId</span> <span class="p">=</span> <span class="nv">$CreatedChildFolder</span><span class="p">.</span><span class="n">id</span>
-<span class="linenos">300</span>            <span class="p">}</span>
-<span class="linenos">301</span>            <span class="k">elseif</span> <span class="p">(</span><span class="nv">$child</span><span class="p">.</span><span class="n">name</span> <span class="o">-eq</span> <span class="s1">&#39;Archived&#39;</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos">302</span>                <span class="nv">$archiveFolderId</span> <span class="p">=</span> <span class="nv">$CreatedChildFolder</span><span class="p">.</span><span class="n">id</span>
-<span class="linenos">303</span>            <span class="p">}</span>
-<span class="linenos">304</span>
-<span class="linenos">305</span>            <span class="k">if</span> <span class="p">(</span><span class="nv">$child</span><span class="p">.</span><span class="n">children</span> <span class="o">-and</span> <span class="nv">$child</span><span class="p">.</span><span class="n">children</span><span class="p">.</span><span class="n">Length</span> <span class="o">-gt</span> <span class="n">0</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos">306</span>                <span class="nb">New-Subfolders</span><span class="n">-Recursively</span> <span class="s2">&quot;</span><span class="p">$(</span><span class="nv">$CreatedChildFolder</span><span class="p">.</span><span class="n">id</span><span class="p">)</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="p">$(</span><span class="nv">$child</span><span class="p">.</span><span class="n">name</span><span class="p">)</span><span class="s2">&quot;</span> <span class="p">$(</span><span class="nv">$child</span><span class="p">.</span><span class="n">children</span><span class="p">)</span>
-<span class="linenos">307</span>            <span class="p">}</span>
-<span class="linenos">308</span>        <span class="p">}</span>
-<span class="linenos">309</span>        <span class="k">catch</span> <span class="p">{</span>
-<span class="linenos">310</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to create subfolder &#39;</span><span class="p">$(</span><span class="nv">$child</span><span class="p">.</span><span class="n">name</span><span class="p">)</span><span class="s2">&#39; under &#39;$ParentFolderName&#39; (ID: $ParentFolderId) folder. See log for details.&quot;</span> <span class="n">-errorMessage</span> <span class="nv">$CreatedChildFolderResp</span> <span class="n">-output</span> <span class="n">True</span> <span class="n">-color</span> <span class="n">Red</span>
-<span class="linenos">311</span>            <span class="k">continue</span>
-<span class="linenos">312</span>        <span class="p">}</span>
-<span class="linenos">313</span>    <span class="p">}</span>
-<span class="linenos">314</span>
-<span class="linenos">315</span>    <span class="c"># Output to MasterMap.csv</span>
-<span class="linenos">316</span>    <span class="no">[PSCustomObject]</span><span class="p">@{</span>
-<span class="linenos">317</span>        <span class="n">User</span> <span class="p">=</span> <span class="nv">$ParentFolderName</span>
-<span class="linenos">318</span>        <span class="n">ArchiveFolderID</span> <span class="p">=</span> <span class="nv">$archiveFolderId</span>
-<span class="linenos">319</span>        <span class="n">ActiveFolderID</span> <span class="p">=</span> <span class="nv">$activeFolderId</span>
-<span class="linenos">320</span>    <span class="p">}</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="n">-Path</span> <span class="nv">$MasterMapFile</span> <span class="n">-NoTypeInformation</span> <span class="n">-Append</span>
-<span class="linenos">321</span>
-<span class="linenos">322</span>    <span class="c"># Output to ActiveFolderIDs.csv</span>
-<span class="linenos">323</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$activeFolderId</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos">324</span>        <span class="no">[PSCustomObject]</span><span class="p">@{</span>
-<span class="linenos">325</span>            <span class="n">ParentID</span> <span class="p">=</span> <span class="nv">$ParentFolderId</span>
-<span class="linenos">326</span>            <span class="n">ID</span> <span class="p">=</span> <span class="nv">$activeFolderId</span>
-<span class="linenos">327</span>            <span class="n">Name</span> <span class="p">=</span> <span class="s1">&#39;&#39;</span>
-<span class="linenos">328</span>        <span class="p">}</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="n">-Path</span> <span class="nv">$ActiveFolderIDsPath</span> <span class="n">-NoTypeInformation</span> <span class="n">-Append</span>
-<span class="linenos">329</span>    <span class="p">}</span>
-<span class="linenos">330</span>
-<span class="linenos">331</span>    <span class="c"># Output to ArchiveFolderIDs.csv</span>
-<span class="linenos">332</span>    <span class="c"># Note: ParentID is being assigned the ID of the Archive folder, which would normally make more sense to be called &quot;ID&quot;</span>
-<span class="linenos">333</span>    <span class="c"># The reason for using ParentID is because the MonthlyArchiveCreate.ps1 script needs the column name ParentID for the API call, as this is where the new subfolder will be placed.</span>
-<span class="linenos">334</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$archiveFolderId</span><span class="p">)</span> <span class="p">{</span>
-<span class="linenos">335</span>        <span class="no">[PSCustomObject]</span><span class="p">@{</span>
-<span class="linenos">336</span>            <span class="n">Name</span> <span class="p">=</span> <span class="s1">&#39;&#39;</span>
-<span class="linenos">337</span>            <span class="n">ParentID</span> <span class="p">=</span> <span class="nv">$archiveFolderId</span>
-<span class="linenos">338</span>        <span class="p">}</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="n">-Path</span> <span class="nv">$ArchivedFolderIDsPath</span> <span class="n">-NoTypeInformation</span> <span class="n">-Append</span>
-<span class="linenos">339</span>    <span class="p">}</span>
-<span class="linenos">340</span><span class="p">}</span>
-<span class="linenos">341</span>
-<span class="linenos">342</span><span class="nb">Start-Users</span><span class="n">-Provisoning-Creation-Script</span>
+<span class="linenos">254</span>    <span class="k">catch</span> <span class="p">{</span>
+<span class="linenos">255</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to create collaboration for user </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">firstName</span><span class="p">)</span><span class="s2"> </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">lastName</span><span class="p">)</span><span class="s2"> with ID: $ManagedUserID, to folder ID: $script:PersonalFolderID. See log for details.&quot;</span> <span class="n">-errorMessage</span> <span class="nv">$CollaboratedResp</span> <span class="n">-output</span> <span class="n">true</span> <span class="n">-color</span> <span class="n">Red</span>
+<span class="linenos">256</span>    <span class="p">}</span>
+<span class="linenos">257</span>
+<span class="linenos">258</span>    <span class="k">try</span> <span class="p">{</span>
+<span class="linenos">259</span>        <span class="nv">$SupervisorResp</span> <span class="p">=</span> <span class="n">box</span> <span class="n">folders</span><span class="p">:</span><span class="n">collaborations</span><span class="p">:</span><span class="n">add</span> <span class="nv">$script:PersonalFolderID</span> <span class="p">-</span><span class="n">-role</span><span class="p">=</span><span class="n">editor</span> <span class="p">-</span><span class="n">-login</span><span class="p">=</span><span class="nv">$managerEmail</span> <span class="p">-</span><span class="n">-json</span> <span class="n">2</span><span class="p">&gt;&amp;</span><span class="n">1</span>
+<span class="linenos">260</span>        <span class="nv">$SupervisorRespObj</span> <span class="p">=</span> <span class="nv">$SupervisorResp</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span>
+<span class="linenos">261</span>        <span class="nv">$SupervisorCollaborationID</span> <span class="p">=</span> <span class="nv">$SupervisorRespObj</span><span class="p">.</span><span class="n">id</span>
+<span class="linenos">262</span>
+<span class="linenos">263</span>        <span class="no">[PSCustomObject]</span><span class="p">@{</span>
+<span class="linenos">264</span>            <span class="n">folderOwner</span> <span class="p">=</span> <span class="nv">$Employee</span><span class="p">.</span><span class="n">email</span>
+<span class="linenos">265</span>            <span class="n">folderName</span> <span class="p">=</span> <span class="nv">$script:PersonalFolderName</span>
+<span class="linenos">266</span>            <span class="n">added</span> <span class="p">=</span> <span class="nv">$Employee</span><span class="p">.</span><span class="n">manager</span>
+<span class="linenos">267</span>            <span class="n">email</span> <span class="p">=</span> <span class="nv">$Employee</span><span class="p">.</span><span class="n">managerEmail</span>
+<span class="linenos">268</span>            <span class="n">collaborationID</span> <span class="p">=</span> <span class="nv">$SupervisorCollaborationID</span>
+<span class="linenos">269</span>            <span class="n">folderID</span> <span class="p">=</span> <span class="nv">$script:PersonalFolderID</span>
+<span class="linenos">270</span>        <span class="p">}</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="n">-Path</span> <span class="nv">$CollaborationInfoCSV</span> <span class="n">-NoTypeInformation</span> <span class="n">-Append</span>
+<span class="linenos">271</span>
+<span class="linenos">272</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Supervisor User </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">manager</span><span class="p">)</span><span class="s2"> collaborated to </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">username</span><span class="p">)</span><span class="s2"> indicated folder for provisioning with ID $script:PersonalFolderID and collaboration ID: $SupervisorCollaborationID&quot;</span> <span class="n">-output</span> <span class="n">True</span>
+<span class="linenos">273</span>    <span class="p">}</span>
+<span class="linenos">274</span>    <span class="k">catch</span> <span class="p">{</span>
+<span class="linenos">275</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to create collaboration for Supervisor </span><span class="p">$(</span><span class="nv">$Employee</span><span class="p">.</span><span class="n">manager</span><span class="p">)</span><span class="s2"> to folder ID: $script:PersonalFolderID. See log for details.&quot;</span> <span class="n">-errorMessage</span> <span class="nv">$SupervisorResp</span> <span class="n">-output</span> <span class="n">true</span> <span class="n">-color</span> <span class="n">Red</span>
+<span class="linenos">276</span>        <span class="k">continue</span>
+<span class="linenos">277</span>    <span class="p">}</span>
+<span class="linenos">278</span><span class="p">}</span>
+<span class="linenos">279</span>
+<span class="linenos">280</span>    <span class="c"># Create folder sturcture form JSON file</span>
+<span class="linenos">281</span><span class="k">Function</span> <span class="nb">New-Folder</span><span class="n">-Structure</span> <span class="p">{</span>
+<span class="linenos">282</span>    <span class="c"># Extract folder structure from json</span>
+<span class="linenos">283</span>    <span class="nb">Write-Log</span> <span class="s2">&quot;Extracting folder structure&quot;</span> <span class="n">-output</span> <span class="n">True</span>
+<span class="linenos">284</span>    <span class="k">try</span> <span class="p">{</span>
+<span class="linenos">285</span>        <span class="nv">$FolderStructure</span> <span class="p">=</span> <span class="nb">Get-Content</span> <span class="n">-Raw</span> <span class="n">-Path</span> <span class="nv">$FolderStructureJSONPath</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span>
+<span class="linenos">286</span>    <span class="p">}</span>
+<span class="linenos">287</span>    <span class="k">catch</span> <span class="p">{</span>
+<span class="linenos">288</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Error reading &#39;$FolderStructureJSONPath&#39;. Exits script.&quot;</span><span class="p">.</span> <span class="n">-errorMessage</span> <span class="s2">&quot;Invalid input data.&quot;</span>  <span class="n">-output</span> <span class="n">True</span> <span class="n">-color</span> <span class="n">Red</span>
+<span class="linenos">289</span>        <span class="k">break</span>
+<span class="linenos">290</span>    <span class="p">}</span>
+<span class="linenos">291</span>
+<span class="linenos">292</span>    <span class="c"># Create Personal Root folder</span>
+<span class="linenos">293</span>    <span class="k">try</span> <span class="p">{</span>
+<span class="linenos">294</span>        <span class="nv">$CreatedPersonalFolderResp</span> <span class="p">=</span> <span class="n">box</span> <span class="n">folders</span><span class="p">:</span><span class="n">create</span> <span class="s2">&quot;$PersonalFolderParentID&quot;</span> <span class="s2">&quot;$script:PersonalFolderName&quot;</span> <span class="p">-</span><span class="n">-json</span> <span class="n">2</span><span class="p">&gt;&amp;</span><span class="n">1</span>
+<span class="linenos">295</span>        <span class="nv">$script:PersonalFolderID</span> <span class="p">=</span> <span class="nv">$CreatedPersonalFolderResp</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span> <span class="nv">$_</span><span class="p">.</span><span class="n">id</span> <span class="p">}</span>
+<span class="linenos">296</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Created a user owned &#39;$PersonalFolderSlug&#39; folder with id: </span><span class="p">$(</span><span class="nv">$script:PersonalFolderID</span><span class="p">)</span><span class="s2">.&quot;</span> <span class="n">-output</span> <span class="n">True</span>
+<span class="linenos">297</span>    <span class="p">}</span>
+<span class="linenos">298</span>    <span class="k">catch</span> <span class="p">{</span>
+<span class="linenos">299</span>        <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to create &#39;$script:PersonalFolderName&#39; folder. See log for details.&quot;</span><span class="p">.</span> <span class="n">-errorMessage</span> <span class="nv">$CreatedPersonalFolderResp</span> <span class="n">-output</span> <span class="n">True</span> <span class="n">-color</span> <span class="n">Red</span>
+<span class="linenos">300</span>
+<span class="linenos">301</span>    <span class="p">}</span>
+<span class="linenos">302</span>
+<span class="linenos">303</span>    <span class="c"># Create all folders structure from json file, where $PersonalFolderSlug is the parent</span>
+<span class="linenos">304</span>    <span class="nb">New-Subfolders</span><span class="n">-Recursively</span> <span class="s2">&quot;$script:PersonalFolderID&quot;</span> <span class="s2">&quot;$script:PersonalFolderName&quot;</span> <span class="nv">$FolderStructure</span>
+<span class="linenos">305</span><span class="p">}</span>
+<span class="linenos">306</span>
+<span class="linenos">307</span><span class="k">Function</span> <span class="nb">New-Subfolders</span><span class="n">-Recursively</span> <span class="p">{</span>
+<span class="linenos">308</span>    <span class="k">Param</span>
+<span class="linenos">309</span>    <span class="p">(</span>
+<span class="linenos">310</span>        <span class="p">[</span><span class="k">Parameter</span><span class="p">(</span><span class="k">Mandatory</span><span class="p">=</span><span class="nv">$true</span><span class="p">,</span> <span class="k">Position</span><span class="p">=</span><span class="n">0</span><span class="p">)]</span>
+<span class="linenos">311</span>        <span class="no">[string]</span> <span class="nv">$ParentFolderId</span><span class="p">,</span>
+<span class="linenos">312</span>        <span class="p">[</span><span class="k">Parameter</span><span class="p">(</span><span class="k">Mandatory</span><span class="p">=</span><span class="nv">$true</span><span class="p">,</span> <span class="k">Position</span><span class="p">=</span><span class="n">1</span><span class="p">)]</span>
+<span class="linenos">313</span>        <span class="no">[string]</span> <span class="nv">$ParentFolderName</span><span class="p">,</span>
+<span class="linenos">314</span>        <span class="p">[</span><span class="k">Parameter</span><span class="p">(</span><span class="k">Mandatory</span><span class="p">=</span><span class="nv">$true</span><span class="p">,</span> <span class="k">Position</span><span class="p">=</span><span class="n">2</span><span class="p">)]</span>
+<span class="linenos">315</span>        <span class="no">[System.Object[]]</span> <span class="nv">$Children</span>
+<span class="linenos">316</span>    <span class="p">)</span>
+<span class="linenos">317</span>
+<span class="linenos">318</span>    <span class="k">ForEach</span> <span class="p">(</span><span class="nv">$child</span> <span class="k">in</span> <span class="nv">$Children</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">319</span>        <span class="k">try</span> <span class="p">{</span>
+<span class="linenos">320</span>            <span class="nv">$CreatedChildFolderResp</span> <span class="p">=</span> <span class="n">box</span> <span class="n">folders</span><span class="p">:</span><span class="n">create</span> <span class="s2">&quot;</span><span class="p">$(</span><span class="nv">$ParentFolderId</span><span class="p">)</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="p">$(</span><span class="nv">$child</span><span class="p">.</span><span class="n">name</span><span class="p">)</span><span class="s2">&quot;</span> <span class="p">-</span><span class="n">-fields</span><span class="p">=</span><span class="s2">&quot;id,name&quot;</span> <span class="p">-</span><span class="n">-json</span> <span class="n">2</span><span class="p">&gt;&amp;</span><span class="n">1</span>
+<span class="linenos">321</span>            <span class="nv">$CreatedChildFolder</span> <span class="p">=</span> <span class="nv">$CreatedChildFolderResp</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span>
+<span class="linenos">322</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Created subfolder &#39;</span><span class="p">$(</span><span class="nv">$child</span><span class="p">.</span><span class="n">name</span><span class="p">)</span><span class="s2">&#39; with id: </span><span class="p">$(</span><span class="nv">$CreatedChildFolder</span><span class="p">.</span><span class="n">id</span><span class="p">)</span><span class="s2"> under &#39;$ParentFolderName&#39; (ID: $ParentFolderId) folder.&quot;</span> <span class="n">-output</span> <span class="n">True</span>
+<span class="linenos">323</span>            <span class="k">if</span> <span class="p">(</span><span class="nv">$child</span><span class="p">.</span><span class="n">name</span> <span class="o">-eq</span> <span class="s1">&#39;Active&#39;</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">324</span>                <span class="nv">$activeFolderId</span> <span class="p">=</span> <span class="nv">$CreatedChildFolder</span><span class="p">.</span><span class="n">id</span>
+<span class="linenos">325</span>            <span class="p">}</span>
+<span class="linenos">326</span>            <span class="k">elseif</span> <span class="p">(</span><span class="nv">$child</span><span class="p">.</span><span class="n">name</span> <span class="o">-eq</span> <span class="s1">&#39;Archived&#39;</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">327</span>                <span class="nv">$archiveFolderId</span> <span class="p">=</span> <span class="nv">$CreatedChildFolder</span><span class="p">.</span><span class="n">id</span>
+<span class="linenos">328</span>            <span class="p">}</span>
+<span class="linenos">329</span>
+<span class="linenos">330</span>            <span class="k">if</span> <span class="p">(</span><span class="nv">$child</span><span class="p">.</span><span class="n">children</span> <span class="o">-and</span> <span class="nv">$child</span><span class="p">.</span><span class="n">children</span><span class="p">.</span><span class="n">Length</span> <span class="o">-gt</span> <span class="n">0</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">331</span>                <span class="nb">New-Subfolders</span><span class="n">-Recursively</span> <span class="s2">&quot;</span><span class="p">$(</span><span class="nv">$CreatedChildFolder</span><span class="p">.</span><span class="n">id</span><span class="p">)</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="p">$(</span><span class="nv">$child</span><span class="p">.</span><span class="n">name</span><span class="p">)</span><span class="s2">&quot;</span> <span class="p">$(</span><span class="nv">$child</span><span class="p">.</span><span class="n">children</span><span class="p">)</span>
+<span class="linenos">332</span>            <span class="p">}</span>
+<span class="linenos">333</span>        <span class="p">}</span>
+<span class="linenos">334</span>        <span class="k">catch</span> <span class="p">{</span>
+<span class="linenos">335</span>            <span class="nb">Write-Log</span> <span class="s2">&quot;Failed to create subfolder &#39;</span><span class="p">$(</span><span class="nv">$child</span><span class="p">.</span><span class="n">name</span><span class="p">)</span><span class="s2">&#39; under &#39;$ParentFolderName&#39; (ID: $ParentFolderId) folder. See log for details.&quot;</span> <span class="n">-errorMessage</span> <span class="nv">$CreatedChildFolderResp</span> <span class="n">-output</span> <span class="n">True</span> <span class="n">-color</span> <span class="n">Red</span>
+<span class="linenos">336</span>            <span class="k">continue</span>
+<span class="linenos">337</span>        <span class="p">}</span>
+<span class="linenos">338</span>    <span class="p">}</span>
+<span class="linenos">339</span>
+<span class="linenos">340</span>    <span class="c"># Output to MasterMap.csv</span>
+<span class="linenos">341</span>    <span class="no">[PSCustomObject]</span><span class="p">@{</span>
+<span class="linenos">342</span>        <span class="n">User</span> <span class="p">=</span> <span class="nv">$ParentFolderName</span>
+<span class="linenos">343</span>        <span class="n">ArchiveFolderID</span> <span class="p">=</span> <span class="nv">$archiveFolderId</span>
+<span class="linenos">344</span>        <span class="n">ActiveFolderID</span> <span class="p">=</span> <span class="nv">$activeFolderId</span>
+<span class="linenos">345</span>    <span class="p">}</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="n">-Path</span> <span class="nv">$MasterMapFile</span> <span class="n">-NoTypeInformation</span> <span class="n">-Append</span>
+<span class="linenos">346</span>
+<span class="linenos">347</span>    <span class="c"># Output to ActiveFolderIDs.csv</span>
+<span class="linenos">348</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$activeFolderId</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">349</span>        <span class="no">[PSCustomObject]</span><span class="p">@{</span>
+<span class="linenos">350</span>            <span class="n">ParentID</span> <span class="p">=</span> <span class="nv">$ParentFolderId</span>
+<span class="linenos">351</span>            <span class="n">ID</span> <span class="p">=</span> <span class="nv">$activeFolderId</span>
+<span class="linenos">352</span>            <span class="n">Name</span> <span class="p">=</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos">353</span>        <span class="p">}</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="n">-Path</span> <span class="nv">$ActiveFolderIDsPath</span> <span class="n">-NoTypeInformation</span> <span class="n">-Append</span>
+<span class="linenos">354</span>    <span class="p">}</span>
+<span class="linenos">355</span>
+<span class="linenos">356</span>    <span class="c"># Output to ArchiveFolderIDs.csv</span>
+<span class="linenos">357</span>    <span class="c"># Note: ParentID is being assigned the ID of the Archive folder, which would normally make more sense to be called &quot;ID&quot;</span>
+<span class="linenos">358</span>    <span class="c"># The reason for using ParentID is because the MonthlyArchiveCreate.ps1 script needs the column name ParentID for the API call, as this is where the new subfolder will be placed.</span>
+<span class="linenos">359</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$archiveFolderId</span><span class="p">)</span> <span class="p">{</span>
+<span class="linenos">360</span>        <span class="no">[PSCustomObject]</span><span class="p">@{</span>
+<span class="linenos">361</span>            <span class="n">Name</span> <span class="p">=</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos">362</span>            <span class="n">ParentID</span> <span class="p">=</span> <span class="nv">$archiveFolderId</span>
+<span class="linenos">363</span>        <span class="p">}</span> <span class="p">|</span> <span class="nb">Export-Csv</span> <span class="n">-Path</span> <span class="nv">$ArchivedFolderIDsPath</span> <span class="n">-NoTypeInformation</span> <span class="n">-Append</span>
+<span class="linenos">364</span>    <span class="p">}</span>
+<span class="linenos">365</span><span class="p">}</span>
+<span class="linenos">366</span>
+<span class="linenos">367</span><span class="nb">Start-Users</span><span class="n">-Provisoning-Creation-Script</span>
 </pre></div>
 </div>
 <p>As stated above, this script should output three different CSV files. MasterMap.csv, ArchiveFolderIDs.csv, and ActiveFolderIDs.csv. It should be noted this version of the script foregos using “Managed users”, or users internal to Box and instead treats everyone as external. This means that they will be invited via email and see their O3 Notes folders as gray in their personal Box. External users can still be managed in the sense that administrators can control which folders are shared with them and their access levels to each of those folders, although they will be considered as external to the organization.</p>
@@ -521,7 +547,7 @@ users in Active Directory. This includes their <code class="docutils literal not
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="getadusers.html" class="btn btn-neutral float-left" title="Get-AD-Users.ps1" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="changemanagement.html" class="btn btn-neutral float-left" title="ChangeManagerment.ps1" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="monthlyarchivecreate.html" class="btn btn-neutral float-right" title="MonthlyArchiveCreate.ps1" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
