@@ -1,0 +1,10 @@
+Planned Improvements
+====================
+
+As with any software development project, the product is never truly complete. There is always more to add and new issues to fix. Here is a list of a few planned improvements.
+
+1. Account for waterfall permissions with Change Management Script
+	Currently, the changemanagement.ps1 is not working. Use functionalchangemanagement.ps1 instead. Changes will need to be made to the full script to account for Box's waterfall permissions model.
+
+2. Have the .csv from Box Reports go to a SQL database which connects to Power BI
+		.csv report > SQL database > Power BI 

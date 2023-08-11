@@ -21,7 +21,8 @@ Welcome to O3 Notes Management with Box API's documentation!
    /copytemplate
    /moveo3notes
    /reportpipeline
-
+   /reporting
+   /futureimprovements
 
 
 Indices and tables

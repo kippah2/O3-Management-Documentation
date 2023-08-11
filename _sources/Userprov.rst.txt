@@ -5,6 +5,8 @@
 .. /getadusers
 .. /changemanagement
 .. /reportpipeline
+.. /reporting
+.. /futureimprovements
 Userprov.ps1
 ============
 
@@ -259,6 +261,7 @@ Below is the full Powershell script for provisioning users and their folders.
 	# First function to run.
 	Function Start-Users-Provisoning-Creation-Script {
 	    Write-Log "Starting User Creation & Personal Folder Provisioning script..." -output true
+	    Copy-Item -Path $EmployeeList -Destination "..\ChangeManagement\oldInput\get-users.csv"
 
 	    try {
 	        # Import CSV with employees to make folders for
@@ -348,27 +351,6 @@ Below is the full Powershell script for provisioning users and their folders.
 	    catch {
 	        Write-Log "Failed to create collaboration for user $($Employee.firstName) $($Employee.lastName) with ID: $ManagedUserID, to folder ID: $script:PersonalFolderID. See log for details." -errorMessage $CollaboratedResp -output true -color Red
 	    }
-
-	    try {
-	        $SupervisorResp = box folders:collaborations:add $script:PersonalFolderID --role=editor --login=$managerEmail --json 2>&1
-	        $SupervisorRespObj = $SupervisorResp | ConvertFrom-Json
-	        $SupervisorCollaborationID = $SupervisorRespObj.id
-
-	        [PSCustomObject]@{
-	            folderOwner = $Employee.email
-	            folderName = $script:PersonalFolderName
-	            added = $Employee.manager
-	            email = $Employee.managerEmail
-	            collaborationID = $SupervisorCollaborationID
-	            folderID = $script:PersonalFolderID
-	        } | Export-Csv -Path $CollaborationInfoCSV -NoTypeInformation -Append
-
-	        Write-Log "Supervisor User $($Employee.manager) collaborated to $($Employee.username) indicated folder for provisioning with ID $script:PersonalFolderID and collaboration ID: $SupervisorCollaborationID" -output True
-	    }
-	    catch {
-	        Write-Log "Failed to create collaboration for Supervisor $($Employee.manager) to folder ID: $script:PersonalFolderID. See log for details." -errorMessage $SupervisorResp -output true -color Red
-	        continue
-	    }
 	}
 
 	    # Create folder sturcture form JSON file
@@ -385,6 +367,8 @@ Below is the full Powershell script for provisioning users and their folders.
 
 	    # Create Personal Root folder
 	    try {
+	        # This is where it creates the Employee's O3 Notes folder
+	        # Syntax is `box folders:create PARENTID NAME`
 	        $CreatedPersonalFolderResp = box folders:create "$PersonalFolderParentID" "$script:PersonalFolderName" --json 2>&1
 	        $script:PersonalFolderID = $CreatedPersonalFolderResp | ConvertFrom-Json | ForEach-Object { $_.id }
 	        Write-Log "Created a user owned '$PersonalFolderSlug' folder with id: $($script:PersonalFolderID)." -output True
@@ -398,6 +382,9 @@ Below is the full Powershell script for provisioning users and their folders.
 	    New-Subfolders-Recursively "$script:PersonalFolderID" "$script:PersonalFolderName" $FolderStructure
 	}
 
+
+	# Important note about this function:
+	# Because of Box's waterfall permissions, an employee's supervisor has to be added to their Active folder as an editor **BEFORE** they are added to the employee's O3 Notes folder as a viewer.
 	Function New-Subfolders-Recursively {
 	    Param
 	    (
@@ -414,13 +401,54 @@ Below is the full Powershell script for provisioning users and their folders.
 	            $CreatedChildFolderResp = box folders:create "$($ParentFolderId)" "$($child.name)" --fields="id,name" --json 2>&1
 	            $CreatedChildFolder = $CreatedChildFolderResp | ConvertFrom-Json
 	            Write-Log "Created subfolder '$($child.name)' with id: $($CreatedChildFolder.id) under '$ParentFolderName' (ID: $ParentFolderId) folder." -output True
-	            if ($child.name -eq 'Active') {
-	                $activeFolderId = $CreatedChildFolder.id
-	            }
-	            elseif ($child.name -eq 'Archived') {
+	            if ($child.name -eq 'Archived') {
+	                # The archiveFolderId is captured so that the folder's ID can be added to the ArchiveFolderIDs.csv file
 	                $archiveFolderId = $CreatedChildFolder.id
 	            }
+	            elseif ($child.name -eq 'Active') {
+	                # If the created folder is called "Active", add the supervisor as a collaborator with Editor access
+	                try {
+	                    # The activeFolderId is captured so that the folder's ID can be added to the ActiveFolderIDs.csv
+	                    $activeFolderId = $CreatedChildFolder.id
+	                    $SupervisorResp = box folders:collaborations:add "$($CreatedChildFolder.id)" --role editor --login $managerEmail --json 2>&1
+	                    $SupervisorRespObj = $SupervisorResp | ConvertFrom-Json
+	                    $SupervisorCollaborationID = $SupervisorRespObj.id
 
+	                    [PSCustomObject]@{
+	                        folderOwner = $Employee.email
+	                        folderName = $child.name
+	                        added = $Employee.manager
+	                        email = $Employee.managerEmail
+	                        collaborationID = $SupervisorCollaborationID
+	                        folderID = $CreatedChildFolder.id
+	                    } | Export-Csv -Path $CollaborationInfoCSV -NoTypeInformation -Append
+	                    Write-Log "Added manager: $($Employee.managerEmail) as Editor to $($Employee.email)'s Active folder." -output True -color Green
+	                }
+	                catch {
+	                    Write-Log "Failed to add manager: $($Employee.manager) as Editor to $($Employee.email)'s Active folder." -output True -color Red
+	                    continue
+	                }
+	                # Next, add the supervisor as a collaborator to the employee's O3 Notes folder with Viewer access.
+	                try {
+	                    $SupervisorRespRootO3 = box folders:collaborations:add $script:PersonalFolderID --role=viewer --login=$managerEmail --json 2>&1
+	                    $SupervisorRespRootO3Obj = $SupervisorRespRootO3 | ConvertFrom-Json
+	                    $SupervisorCollaborationRootO3ID = $SupervisorRespRootO3Obj.id
+
+	                    [PSCustomObject]@{
+	                        folderOwner = $Employee.email
+	                        folderName = $script:PersonalFolderName
+	                        added = $Employee.manager
+	                        email = $Employee.managerEmail
+	                        collaborationID = $SupervisorCollaborationRootO3ID
+	                        folderID = $script:PersonalFolderID
+	                    } | Export-Csv -Path $CollaborationInfoCSV -NoTypeInformation -Append
+	                    Write-Log "Added manager: $($Employee.managerEmail) as Editor to $($Employee.email)'s O3 Note folder." -output True -color Green
+	                }
+	                catch {
+	                    Write-Log "Failed to add manager: $($Employee.manager) as Viewer to $($Employee.email)'s O3 Note folder." -output True -color Red
+	                }
+	            }
+	            # If there are more objects in the array of folders to add (Archived and Active), recursively call the function again.
 	            if ($child.children -and $child.children.Length -gt 0) {
 	                New-Subfolders-Recursively "$($CreatedChildFolder.id)" "$($child.name)" $($child.children)
 	            }
@@ -459,6 +487,8 @@ Below is the full Powershell script for provisioning users and their folders.
 	}
 
 	Start-Users-Provisoning-Creation-Script
+
+
 
 
 

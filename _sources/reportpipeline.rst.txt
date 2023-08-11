@@ -1,5 +1,7 @@
 .. /getadusers
 .. /changemanagement
+.. /reporting
+.. /futureimprovements
 ReportPipeline.ps1
 ==================
 

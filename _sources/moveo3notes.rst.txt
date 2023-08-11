@@ -1,6 +1,8 @@
 .. /getadusers
 .. /changemanagement
 .. /reportpipeline
+.. /reporting
+.. /futureimprovements
 MoveO3Notes.ps1
 ===============
 

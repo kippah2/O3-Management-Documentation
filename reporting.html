@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Box Report to PowerBI Pipeline &mdash; O3 Notes Management with Box API  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Planned Improvements" href="futureimprovements.html" />
+    <link rel="prev" title="ReportPipeline.ps1" href="reportpipeline.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            O3 Notes Management with Box API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filestructure.html">File Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scriptsoverview.html">Scripts Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getadusers.html">Get-AD-Users.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changemanagement.html">ChangeManagerment.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Userprov.html">Userprov.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monthlyarchivecreate.html">MonthlyArchiveCreate.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copytemplate.html">CopyTemplate.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="moveo3notes.html">MoveO3Notes.ps1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reportpipeline.html">ReportPipeline.ps1</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Box Report to PowerBI Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#data-that-box-reports">Data that Box Reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#columns-added-to-manipulate-data">Columns Added to Manipulate Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#additional-sheet-specifically-for-powerbi">Additional Sheet Specifically for PowerBI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="futureimprovements.html">Planned Improvements</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">O3 Notes Management with Box API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Box Report to PowerBI Pipeline</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/reporting.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="box-report-to-powerbi-pipeline">
+<h1>Box Report to PowerBI Pipeline<a class="headerlink" href="#box-report-to-powerbi-pipeline" title="Permalink to this heading"></a></h1>
+<p>For the demo, a report was ran on Box and returned a .csv file. .csv was converted to .xlsx. This data was edited to resemble actual employee use. The data was then imported into PowerBI to make the dashboard.</p>
+<section id="data-that-box-reports">
+<h2>Data that Box Reports<a class="headerlink" href="#data-that-box-reports" title="Permalink to this heading"></a></h2>
+<p>Owner Name, Owner, Path, Path ID, Item Name, Item Type, Size, Created, Last Modified, and Uploaded</p>
+</section>
+<section id="columns-added-to-manipulate-data">
+<h2>Columns Added to Manipulate Data<a class="headerlink" href="#columns-added-to-manipulate-data" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt><strong>Name from Path</strong></dt><dd><ul class="simple">
+<li><p>Description: Extracts Name from column “Path”</p></li>
+<li><dl class="simple">
+<dt>Formula: =MID(C9, SEARCH(“/O3 Notes/”, C9) + 10, SEARCH(“‘s”, C9, SEARCH(“‘s”,C9) -2) - SEARCH(“/O3 Notes/”, C9)-10)</dt><dd><p><em>Where C9 is the cell in “Path”</em></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Example: Input: “All Files/O3 Notes/AlGomez’s O3 Notes/Archived/2023-06/”</dt><dd><p>Output: AlGomez</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>int Size</strong></dt><dd><ul class="simple">
+<li><p>Description: Gets integer value from “Size Column”</p></li>
+<li><dl class="simple">
+<dt>Formula: =VALUE(LEFT(I9,LEN(I9)-2))</dt><dd><p><em>Where I9 is the cell in “Size Column”</em></p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Department M</strong></dt><dd><ul class="simple">
+<li><p>Description: The Department that the employee is in, right now manually entered</p></li>
+<li><p>Formula: n/a</p></li>
+<li><p>Comment: For the future, Box reports should be modified to report this information</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ol>
+</section>
+<section id="additional-sheet-specifically-for-powerbi">
+<h2>Additional Sheet Specifically for PowerBI<a class="headerlink" href="#additional-sheet-specifically-for-powerbi" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt><strong>Name</strong></dt><dd><ul class="simple">
+<li><p>Description: Equal to each unique entry in “Name from Path”</p></li>
+<li><p>Formula: n/a</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Number Completed</strong></dt><dd><ul class="simple">
+<li><p>Description: Number of files that comply with O3 guidelines</p></li>
+<li><dl class="simple">
+<dt>Formula: =COUNTIFS(J:J,”&gt;=7.0”,D:D,P4,H:H,”=File”)</dt><dd><p><em>Where J is “int Size”, D is “Name from Path”, H is “Item Type”</em></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Comment: Right now compliancy is based off of File Size that is greater than 7KB, Item Type is File, and if the name matches in the File Path</dt><dd><p>In the future, may want to add an additional requirement that a comment on the file has been made. (Meaning employee made an agenda)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Compliant</strong></dt><dd><ul class="simple">
+<li><p>Description: If the “Number Completed” &gt;= Amount of O3 Meetings Required</p></li>
+<li><dl class="simple">
+<dt>Formula: =IF(Q4&gt;=6,”Yes”,”No”)</dt><dd><p><em>Where Q4 is the cell from “Number Completed” Column</em></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Comment: For right now, compliancy is at least 3 O3 meetings a month (3 files with 7.0KB or more)</dt><dd><p>Will have to create a formula calculating the number of months passed in the calender year multiplied by 3 to make the minimum amount
+HR may require more or less which this formula can easily be edited</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Department</strong></dt><dd><ul class="simple">
+<li><p>Description: Department of the Employee</p></li>
+<li><p>Formula: n/a</p></li>
+<li><p>Comment: As mentioned before, as of right now Department is manually entered but in the future Box will report it</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Manager</strong></dt><dd><ul class="simple">
+<li><p>Description: Manager of Employee</p></li>
+<li><p>Formula: n/a</p></li>
+<li><p>Comment: As mentioned before, as of right now Manually is manually entered but in the future Box will report it</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="reportpipeline.html" class="btn btn-neutral float-left" title="ReportPipeline.ps1" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="futureimprovements.html" class="btn btn-neutral float-right" title="Planned Improvements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jeffrey Samuels, Hannah Brown.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

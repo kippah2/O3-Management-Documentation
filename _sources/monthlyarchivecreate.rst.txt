@@ -3,6 +3,8 @@
 .. /getadusers
 .. /changemanagement
 .. /reportpipeline
+.. /reporting
+.. /futureimprovements
 MonthlyArchiveCreate.ps1
 ========================
 

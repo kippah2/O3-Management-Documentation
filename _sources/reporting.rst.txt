@@ -1,0 +1,63 @@
+.. /futureimprovements
+Box Report to PowerBI Pipeline
+======================================
+
+For the demo, a report was ran on Box and returned a .csv file. .csv was converted to .xlsx. This data was edited to resemble actual employee use. The data was then imported into PowerBI to make the dashboard.
+
+Data that Box Reports
+---------------------
+
+Owner Name, Owner, Path, Path ID, Item Name, Item Type, Size, Created, Last Modified, and Uploaded
+
+Columns Added to Manipulate Data
+--------------------------------
+
+1. **Name from Path**
+	* Description: Extracts Name from column "Path"
+	* Formula: =MID(C9, SEARCH("/O3 Notes/", C9) + 10, SEARCH("'s", C9, SEARCH("'s",C9) -2) - SEARCH("/O3 Notes/", C9)-10) 
+				*Where C9 is the cell in "Path"*
+	* Example: Input: "All Files/O3 Notes/AlGomez's O3 Notes/Archived/2023-06/"
+			   Output: AlGomez
+
+2. **int Size**
+	* Description: Gets integer value from "Size Column"
+	* Formula: =VALUE(LEFT(I9,LEN(I9)-2))
+				*Where I9 is the cell in "Size Column"*
+
+3. **Department M**
+	* Description: The Department that the employee is in, right now manually entered
+	* Formula: n/a
+	* Comment: For the future, Box reports should be modified to report this information
+
+Additional Sheet Specifically for PowerBI
+-----------------------------------------
+
+1. **Name**
+	* Description: Equal to each unique entry in "Name from Path"
+	* Formula: n/a
+
+2. **Number Completed** 
+	* Description: Number of files that comply with O3 guidelines
+	* Formula: =COUNTIFS(J:J,">=7.0",D:D,P4,H:H,"=File")
+		       *Where J is "int Size", D is "Name from Path", H is "Item Type"*
+	* Comment: Right now compliancy is based off of File Size that is greater than 7KB, Item Type is File, and if the name matches in the File Path
+			   In the future, may want to add an additional requirement that a comment on the file has been made. (Meaning employee made an agenda)
+
+3. **Compliant** 
+	* Description: If the "Number Completed" >= Amount of O3 Meetings Required
+	* Formula: =IF(Q4>=6,"Yes","No")
+				*Where Q4 is the cell from "Number Completed" Column* 
+	* Comment: For right now, compliancy is at least 3 O3 meetings a month (3 files with 7.0KB or more)
+			   Will have to create a formula calculating the number of months passed in the calender year multiplied by 3 to make the minimum amount
+			   HR may require more or less which this formula can easily be edited 
+
+4. **Department**
+	* Description: Department of the Employee
+	* Formula: n/a
+	* Comment: As mentioned before, as of right now Department is manually entered but in the future Box will report it 
+
+5. **Manager**
+	* Description: Manager of Employee 
+	* Formula: n/a
+	* Comment: As mentioned before, as of right now Manually is manually entered but in the future Box will report it
+	

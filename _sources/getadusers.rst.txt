@@ -1,5 +1,7 @@
 .. /changemanagement
 .. /reportpipeline
+.. /reporting
+.. /futureimprovements
 Get-AD-Users.ps1
 ================
 

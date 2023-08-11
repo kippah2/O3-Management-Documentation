@@ -1,9 +1,15 @@
 .. /getadusers
 .. /changemanagement
+.. /reporting
+.. /futureimprovements
 ChangeManagerment.ps1
 =====================
 
 The change management script is responsible for comparing the most recent active directory-pulled user list with the user list that was last used for the user prov script.
+
+**Important: Currently, the full version of changemanagement is a WIP. Due to Box's waterfall permission model, some changes need to be made to make all the automatic collaboration changes work as intended. In the mean time, please use the "functionalchangemanagement.ps1" script. This will only generate a list of changes between both input CSVs. Administrators must make these changes manually. Please remember to modify the CollaborationInfo.csv file by removing lines that pertain to the old managers and adding lines pertaining to new collaborations when they're made. Of course, you will need to make the changes on Box as well. The Box-CLI is recommended for this task as it will return the CollaborationID, which should be used when adding entries into CollaborationInfo.csv.**
+
+**Please watch: `Important Update <https://truebeck.sharepoint.com/:v:/s/O3-Test-JeffreysO3/EbYHWbbYYRZAqHA42f3qm7MBHI8WCz_u8GJ4UMeH442TlA?e=ACBnM9&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZyIsInJlZmVycmFsQXBwUGxhdGZvcm0iOiJXZWIiLCJyZWZlcnJhbE1vZGUiOiJ2aWV3In19>`_ **
 
 After User-Prov runs, place its input get-users.csv into the "old input" folder of the change management script. The get-ad-users script should be run before this script, ideally on the day of. Place the output of the most recent get-users.csv into the "new input" folder of the change management script.
 
@@ -82,10 +88,15 @@ If a new collaboration is being added, all of the relevant information will be a
 
 Here is the script in it's entirety:
 
+**NOTE: This is not the script described above, this is the temporary script as described on the top of this page. This script will NOT automatically add or remove collaborations!**
+
 changemanagement.ps1
 --------------------
 .. code-block:: Powershell
 	:linenos:
+
+	# Currently, the automated Changemanagement.ps1 script is broken, USE THIS ONE!!!!
+	# It will output a list of all changes, these changes will have to be made manually until the full version is finished.
 
 	# Define the paths to the input CSV files
 	$latestFile = ".\newInput\get-users-test.csv"
@@ -173,50 +184,4 @@ changemanagement.ps1
 
 	# Export the discrepancies to a CSV file
 	$discrepancies | Export-Csv -Path ".\Output\discrepancies.csv" -NoTypeInformation
-
-	$discrep = $discrepancies | Where-Object {$_.Action -contains "Manager Changed"}
-	$collabinfo = $collaborations | Where-Object {$_.folderOwner -ne $_.email}
-
-	makeChanges $discrep $collabinfo
-
-	# Function for adding new managers to folders and removing old managers from folders.
-	function makeChanges ($discrep, $collabinfo){
-	    # Iterate through $discrep, which is object array of instances where the manager changed.
-	    foreach ($discrepobject in $discrep) {
-	        # Iterate through $collabobject, which is an object array of collaborations where the owner of the folder is not the same person who the collaboration is for.
-	        foreach ($collabobject in $collabinfo) {
-	            echo "collab: $($collabobject.email) discrep: $($discrepobject.email)"
-	            if ($collabobject.folderOwner -eq $discrepobject.email) {
-	                Write-Host "Match found for $($collabobject.folderOwner) and $($discrepobject.email)"
-	                if ($collabobject.email -ne $discrepobject.newManagerEmail) {
-	                    $newManagerResp = (box folders:collaborations:add $collabobject.folderID --role editor --login $($discrepobject.newManagerEmail) --json 2>&1)
-	                    $newManagerRespObj = $newManagerResp | ConvertFrom-JSON
-	                    $CollaborationID = $newManagerRespObj.id
-	                    $folderName = $newManagerRespObj.item.name
-	                    $newcollaborations += [PSCustomObject]@{
-	                        folderowner = $collabobject.folderOwner
-	                        folderName = $collabobject.folderName
-	                        added = $discrepobject.newManager
-	                        email = $discrepobject.newManagerEmail
-	                        collaborationID = $CollaborationID
-	                        folderID = $collabobject.folderID
-	                    } | Export-Csv -Path $collaborationFile -NoTypeInformation -Append
-	                    Write-Host "Added collaborator $($discrepobject.newManager) to $folderName."
-	                }
-	                if ($collabobject.email -eq $discrepobject.oldManagerEmail) {
-	                    $deleteManagerResp = (box collaborations:delete $collabobject.collaborationID)
-	                    Write-Host "Removing collaboration with ID $collaborationID"
-	                    # Remove the collaboration from the $collaborations array
-	                    $global:collaborations = $global:collaborations | Where-Object { $_.collaborationID -ne $collabobject.collaborationID }
-	                    # Export the updated $collaborations array back to the CSV file
-	                    $global:collaborations | Export-Csv $collaborationFile -NoTypeInformation
-	                }
-	            else {
-	                Write-Host "Folder owner $($collabobject.folderOwner) is not user from discrepancy $($discrepobject.email). Moving on."
-	            }
-	        }
-	    }
-	    }
-	}
-
 

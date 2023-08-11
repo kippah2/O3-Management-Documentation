@@ -5,6 +5,8 @@
 .. /getadusers
 .. /changemanagement
 .. /reportpipeline
+.. /reporting
+.. /futureimprovements
 Scripts Overview
 ================
 

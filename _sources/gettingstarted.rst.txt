@@ -6,6 +6,8 @@
 .. /getadusers
 .. /changemanagement
 .. /reportpipeline
+.. /reporting
+.. /futureimprovements
 Getting Started
 ===============
 
